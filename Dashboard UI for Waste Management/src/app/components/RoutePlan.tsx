@@ -2,10 +2,10 @@ import { useState } from 'react';
 import { motion } from 'motion/react';
 import { RouteSummaryCards } from './RouteSummaryCards';
 import { RouteActions } from './RouteActions';
-import { PlanComparison } from './PlanComparison';
 import { VehicleAssignmentTable } from './VehicleAssignmentTable';
 import { ChangeReasons } from './ChangeReasons';
 import { SmartRecommendation } from './SmartRecommendation';
+import { SmartRoutingPanel } from './SmartRoutingPanel';
 
 export function RoutePlan() {
   const [isRegenerating, setIsRegenerating] = useState(false);
@@ -53,14 +53,16 @@ export function RoutePlan() {
         {/* Smart Recommendation */}
         <SmartRecommendation />
 
-        {/* Plan Comparison */}
-        <PlanComparison isRegenerating={isRegenerating} />
-
         {/* Change Reasons */}
         <ChangeReasons />
 
         {/* Vehicle Assignment Table */}
         <VehicleAssignmentTable />
+
+        {/* Smart Routing Engine */}
+        <div className="pt-4 border-t-2 border-border">
+          <SmartRoutingPanel />
+        </div>
       </div>
     </div>
   );

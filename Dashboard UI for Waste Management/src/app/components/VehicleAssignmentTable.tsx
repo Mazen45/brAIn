@@ -7,7 +7,6 @@ export function VehicleAssignmentTable() {
       id: 1,
       vehicle: 'مركبة 1',
       driver: 'أحمد محمد',
-      zones: 'الشمالية، الوسطى، الشرقية، الجنوبية (حي السلام)',
       tasks: 4,
       status: 'active' as const,
     },
@@ -15,7 +14,6 @@ export function VehicleAssignmentTable() {
       id: 2,
       vehicle: 'مركبة 2',
       driver: 'سارة أحمد',
-      zones: 'الغربية، الجنوبية',
       tasks: 2,
       status: 'active' as const,
     },
@@ -23,7 +21,6 @@ export function VehicleAssignmentTable() {
       id: 3,
       vehicle: 'مركبة 3',
       driver: 'محمد علي',
-      zones: '-',
       tasks: 0,
       status: 'unavailable' as const,
     },
@@ -31,7 +28,6 @@ export function VehicleAssignmentTable() {
       id: 4,
       vehicle: 'مركبة 4',
       driver: 'فاطمة حسن',
-      zones: 'المنطقة الصناعية',
       tasks: 1,
       status: 'active' as const,
     },
@@ -44,9 +40,9 @@ export function VehicleAssignmentTable() {
       transition={{ delay: 0.8, duration: 0.5 }}
       className="bg-card rounded-xl border-2 border-border p-6 shadow-lg"
     >
-      <h3 className="text-lg font-semibold mb-4">توزيع المناطق على المركبات</h3>
+      <h3 className="text-lg font-semibold mb-4">توزيع المهام على المركبات</h3>
       <p className="text-sm text-muted-foreground mb-6">
-        جدول شامل بتوزيع جميع المناطق على المركبات المتاحة
+        جدول شامل بتوزيع جميع المهام على المركبات المتاحة
       </p>
 
       <div className="overflow-x-auto">
@@ -55,7 +51,6 @@ export function VehicleAssignmentTable() {
             <tr className="bg-muted/50 border-b-2 border-border">
               <th className="text-right p-4 font-semibold text-foreground">المركبة</th>
               <th className="text-right p-4 font-semibold text-foreground">السائق</th>
-              <th className="text-right p-4 font-semibold text-foreground">المناطق</th>
               <th className="text-center p-4 font-semibold text-foreground">عدد المهام</th>
               <th className="text-center p-4 font-semibold text-foreground">الحالة</th>
             </tr>
@@ -74,9 +69,6 @@ export function VehicleAssignmentTable() {
                 </td>
                 <td className="p-4">
                   <span className="text-foreground">{assignment.driver}</span>
-                </td>
-                <td className="p-4">
-                  <span className="text-sm text-muted-foreground">{assignment.zones}</span>
                 </td>
                 <td className="p-4 text-center">
                   <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary font-bold">

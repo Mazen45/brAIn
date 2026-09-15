@@ -8,42 +8,36 @@ export function VehicleOverview() {
       number: 'مركبة 1',
       driver: 'أحمد محمد',
       status: 'operational' as const,
-      zone: 'المنطقة الشمالية',
     },
     {
       id: 2,
       number: 'مركبة 2',
       driver: 'سارة أحمد',
       status: 'operational' as const,
-      zone: 'المنطقة الغربية',
     },
     {
       id: 3,
       number: 'مركبة 3',
       driver: '-',
       status: 'out-of-service' as const,
-      zone: '-',
     },
     {
       id: 4,
       number: 'مركبة 4',
       driver: 'فاطمة حسن',
       status: 'operational' as const,
-      zone: 'المنطقة الصناعية',
     },
     {
       id: 5,
       number: 'مركبة 5',
       driver: 'خالد يوسف',
       status: 'operational' as const,
-      zone: 'المنطقة الجنوبية',
     },
     {
       id: 6,
       number: 'مركبة 6',
       driver: '-',
       status: 'maintenance' as const,
-      zone: '-',
     },
   ];
 
@@ -122,10 +116,6 @@ export function VehicleOverview() {
                 <div className="flex items-center justify-between">
                   <span className="text-xs text-muted-foreground">السائق المرتبط:</span>
                   <span className="text-sm font-medium text-foreground">{vehicle.driver}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-muted-foreground">المنطقة الحالية:</span>
-                  <span className="text-sm font-medium text-foreground">{vehicle.zone}</span>
                 </div>
               </div>
             </motion.div>

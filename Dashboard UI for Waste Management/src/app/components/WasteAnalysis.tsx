@@ -1,15 +1,11 @@
 import { motion } from 'motion/react';
 import { AnalysisSummaryCards } from './AnalysisSummaryCards';
-import { AccumulationChart } from './AccumulationChart';
 import { VehicleImpactSection } from './VehicleImpactSection';
-import { DelayedZonesSection } from './DelayedZonesSection';
-import { HighPriorityZones } from './HighPriorityZones';
 import { SmartInsightBox } from './SmartInsightBox';
 import { AnalysisFilters } from './AnalysisFilters';
 import { useState } from 'react';
 
 export function WasteAnalysis() {
-  const [selectedZone, setSelectedZone] = useState<string>('all');
   const [selectedLevel, setSelectedLevel] = useState<string>('all');
   const [selectedResources, setSelectedResources] = useState<string>('all');
 
@@ -23,19 +19,17 @@ export function WasteAnalysis() {
           transition={{ duration: 0.5 }}
         >
           <h1 className="text-3xl font-bold text-foreground mb-2">
-            تحليل مناطق تراكم النفايات
+            تحليل تراكم النفايات
           </h1>
           <p className="text-muted-foreground">
-            عرض وتحليل المناطق حسب مستوى التراكم وتأثير الموارد
+            عرض وتحليل مستوى التراكم وتأثير الموارد
           </p>
         </motion.div>
 
         {/* Filters */}
         <AnalysisFilters
-          selectedZone={selectedZone}
           selectedLevel={selectedLevel}
           selectedResources={selectedResources}
-          onZoneChange={setSelectedZone}
           onLevelChange={setSelectedLevel}
           onResourcesChange={setSelectedResources}
         />
@@ -46,20 +40,8 @@ export function WasteAnalysis() {
         {/* Smart Insight Box */}
         <SmartInsightBox />
 
-        {/* Accumulation Chart */}
-        <AccumulationChart />
-
-        {/* Two Column Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Vehicle Impact */}
-          <VehicleImpactSection />
-
-          {/* Delayed Zones */}
-          <DelayedZonesSection />
-        </div>
-
-        {/* High Priority Zones */}
-        <HighPriorityZones />
+        {/* Vehicle Impact */}
+        <VehicleImpactSection />
       </div>
     </div>
   );

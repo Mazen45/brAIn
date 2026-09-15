@@ -1,68 +1,49 @@
-import { Truck } from 'lucide-react';
-import { motion } from 'motion/react';
+import { useMemo } from 'react';
+import L from 'leaflet';
+import type { LeafletMouseEvent } from 'leaflet';
+import { Marker } from 'react-leaflet';
 import { Vehicle } from './MapView';
 
 interface VehicleMarkerProps {
   vehicle: Vehicle;
-  onClick: (e: React.MouseEvent) => void;
-  style?: React.CSSProperties;
+  onClick: (e: LeafletMouseEvent) => void;
+  zIndexOffset?: number;
 }
 
-export function VehicleMarker({ vehicle, onClick, style }: VehicleMarkerProps) {
+export function VehicleMarker({ vehicle, onClick, zIndexOffset }: VehicleMarkerProps) {
   const isActive = vehicle.status === 'active';
+  const label = vehicle.id;
+  const color = isActive ? vehicle.color : undefined;
+  const colorStyle = color ? ` style="background:${color}"` : '';
+
+  const icon = useMemo(
+    () =>
+      L.divIcon({
+        className: 'vehicle-div-icon',
+        html: `
+          <div class="vehicle-pin ${isActive ? 'vehicle-pin--active' : 'vehicle-pin--inactive'}"${colorStyle}>
+            ${isActive ? `<span class="vehicle-pin__pulse"${colorStyle}></span>` : ''}
+            <span class="vehicle-pin__icon">🚚</span>
+          </div>
+          <div class="vehicle-pin__badge ${isActive ? 'vehicle-pin__badge--active' : 'vehicle-pin__badge--inactive'}"${colorStyle}>${label}</div>
+        `,
+        iconSize: [40, 40],
+        iconAnchor: [20, 20],
+      }),
+    [isActive, label, colorStyle]
+  );
 
   return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.5, delay: Math.random() * 0.4 }}
-      whileHover={{ scale: 1.2 }}
-      onClick={onClick}
-      className="absolute cursor-pointer"
-      style={{
-        left: `${vehicle.position.x}%`,
-        top: `${vehicle.position.y}%`,
-        transform: 'translate(-50%, -50%)',
-        ...style,
+    <Marker
+      position={vehicle.position}
+      icon={icon}
+      zIndexOffset={zIndexOffset}
+      eventHandlers={{
+        click: (e) => {
+          e.originalEvent.stopPropagation();
+          onClick(e);
+        },
       }}
-    >
-      {/* Vehicle Icon Container */}
-      <div
-        className={`
-          relative w-10 h-10 rounded-full flex items-center justify-center shadow-lg
-          ${isActive ? 'bg-success' : 'bg-muted-foreground'}
-        `}
-      >
-        <Truck className="w-5 h-5 text-white" />
-
-        {/* Active Pulse Effect */}
-        {isActive && (
-          <motion.div
-            className="absolute inset-0 rounded-full bg-success"
-            initial={{ scale: 1, opacity: 0.5 }}
-            animate={{
-              scale: 1.5,
-              opacity: 0,
-            }}
-            transition={{
-              duration: 2,
-              repeat: Infinity,
-              ease: 'easeOut',
-            }}
-          />
-        )}
-      </div>
-
-      {/* Vehicle ID Badge */}
-      <div
-        className={`
-          absolute -bottom-2 left-1/2 transform -translate-x-1/2
-          px-2 py-0.5 rounded-full text-xs font-semibold whitespace-nowrap shadow-md
-          ${isActive ? 'bg-success text-white' : 'bg-muted-foreground text-white'}
-        `}
-      >
-        {vehicle.id.replace('v', 'م')}
-      </div>
-    </motion.div>
+    />
   );
 }

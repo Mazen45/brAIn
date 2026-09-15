@@ -13,7 +13,7 @@ export default defineConfig({
   resolve: {
     alias: {
       // Alias @ to the src directory
-      '@': srcDir,له
+      '@': srcDir
     },
   },
 

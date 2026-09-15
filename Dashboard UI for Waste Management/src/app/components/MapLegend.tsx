@@ -11,7 +11,7 @@ export function MapLegend() {
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.3, duration: 0.5 }}
       className="absolute bottom-6 left-6 bg-card/95 backdrop-blur-sm border-2 border-border rounded-xl shadow-xl overflow-hidden"
-      style={{ zIndex: 10 }}
+      style={{ zIndex: 1100 }}
       dir="rtl"
     >
       {/* Header */}
@@ -40,27 +40,8 @@ export function MapLegend() {
             <div className="p-4 pt-0 space-y-2.5 border-t border-border"
               style={{ minWidth: '200px' }}
             >
-              {/* Zone Status */}
-              <div>
-                <p className="text-xs text-muted-foreground mb-1.5 font-medium">حالة المناطق:</p>
-                <div className="space-y-1.5">
-                  <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 rounded bg-success border border-success/30"></div>
-                    <span className="text-xs">طبيعي</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 rounded bg-warning border border-warning/30"></div>
-                    <span className="text-xs">متوسط</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 rounded bg-destructive border border-destructive/30"></div>
-                    <span className="text-xs">حرج</span>
-                  </div>
-                </div>
-              </div>
-
               {/* Vehicle Status */}
-              <div className="pt-2 border-t border-border/50">
+              <div>
                 <p className="text-xs text-muted-foreground mb-1.5 font-medium">حالة المركبات:</p>
                 <div className="space-y-1.5">
                   <div className="flex items-center gap-2">
@@ -74,23 +55,45 @@ export function MapLegend() {
                 </div>
               </div>
 
-              {/* Route Types */}
+              {/* Container fill level */}
               <div className="pt-2 border-t border-border/50">
-                <p className="text-xs text-muted-foreground mb-1.5 font-medium">نوع المسارات:</p>
+                <p className="text-xs text-muted-foreground mb-1.5 font-medium">امتلاء الحاويات:</p>
                 <div className="space-y-1.5">
                   <div className="flex items-center gap-2">
-                    <div className="w-6 h-0.5 bg-primary"></div>
-                    <span className="text-xs">مسار عادي</span>
+                    <div className="w-3 h-3 rounded-full" style={{ background: '#dc2626' }}></div>
+                    <span className="text-xs">خطر فيضان (90%+)</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <div className="w-6 h-0.5 bg-blue-500"></div>
-                    <span className="text-xs">مسار محدث</span>
+                    <div className="w-3 h-3 rounded-full" style={{ background: '#f59e0b' }}></div>
+                    <span className="text-xs">مستحقة الجمع (60%+)</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <div className="w-6 h-0.5 border-t-2 border-dashed border-muted-foreground"></div>
-                    <span className="text-xs">مسار ملغي</span>
+                    <div className="w-3 h-3 rounded-full" style={{ background: '#10b981' }}></div>
+                    <span className="text-xs">لم تستحق بعد</span>
                   </div>
                 </div>
+              </div>
+
+              {/* Route colors */}
+              <div className="pt-2 border-t border-border/50">
+                <p className="text-xs text-muted-foreground mb-1.5 font-medium">المسارات المحسّنة:</p>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  كل لون خط يمثل مسار مركبة مختلفة، محسوب على شبكة الطرق الفعلية ومرتّب لأقصر مسافة ممكنة.
+                </p>
+              </div>
+
+              {/* Landfill road */}
+              <div className="pt-2 border-t border-border/50">
+                <div className="flex items-center gap-2 mb-1">
+                  <div
+                    className="w-4 h-0"
+                    style={{ borderTop: '2px dashed #78350f' }}
+                  ></div>
+                  <span className="text-xs">🗑️ الطريق إلى مكب المنية</span>
+                </div>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  الطريق الوحيد خارج مدينة الخليل - لا توجد حاويات أو مناطق خدمة خارج المدينة.
+                </p>
               </div>
             </div>
           </motion.div>

@@ -9,7 +9,6 @@ export function DriversTable() {
       vehicle: 'مركبة 1',
       status: 'on-duty' as const,
       reason: '-',
-      zone: 'المنطقة الشمالية',
       lastUpdate: 'منذ 10 دقائق',
     },
     {
@@ -18,7 +17,6 @@ export function DriversTable() {
       vehicle: 'مركبة 2',
       status: 'on-duty' as const,
       reason: '-',
-      zone: 'المنطقة الغربية',
       lastUpdate: 'منذ 15 دقيقة',
     },
     {
@@ -27,7 +25,6 @@ export function DriversTable() {
       vehicle: 'مركبة 3',
       status: 'unavailable' as const,
       reason: 'إجازة',
-      zone: '-',
       lastUpdate: 'منذ ساعة',
     },
     {
@@ -36,7 +33,6 @@ export function DriversTable() {
       vehicle: 'مركبة 4',
       status: 'available' as const,
       reason: '-',
-      zone: 'المنطقة الصناعية',
       lastUpdate: 'منذ 5 دقائق',
     },
     {
@@ -45,7 +41,6 @@ export function DriversTable() {
       vehicle: 'مركبة 5',
       status: 'on-duty' as const,
       reason: '-',
-      zone: 'المنطقة الجنوبية',
       lastUpdate: 'منذ 20 دقيقة',
     },
     {
@@ -54,7 +49,6 @@ export function DriversTable() {
       vehicle: '-',
       status: 'unavailable' as const,
       reason: 'ظرف طارئ',
-      zone: '-',
       lastUpdate: 'منذ ساعتين',
     },
     {
@@ -63,7 +57,6 @@ export function DriversTable() {
       vehicle: 'مركبة 7',
       status: 'available' as const,
       reason: '-',
-      zone: 'المنطقة الوسطى',
       lastUpdate: 'منذ دقيقة',
     },
   ];
@@ -101,7 +94,7 @@ export function DriversTable() {
       <div className="p-6 border-b border-border">
         <h3 className="text-lg font-semibold">قائمة السائقين</h3>
         <p className="text-sm text-muted-foreground mt-1">
-          جميع السائقين مع حالتهم الحالية والمناطق المكلفين بها
+          جميع السائقين مع حالتهم الحالية
         </p>
       </div>
 
@@ -114,7 +107,6 @@ export function DriversTable() {
               <th className="text-right p-4 font-semibold text-foreground">المركبة</th>
               <th className="text-right p-4 font-semibold text-foreground">الحالة</th>
               <th className="text-right p-4 font-semibold text-foreground">سبب عدم التوفر</th>
-              <th className="text-right p-4 font-semibold text-foreground">المنطقة المكلف بها</th>
               <th className="text-right p-4 font-semibold text-foreground">آخر تحديث</th>
               <th className="text-center p-4 font-semibold text-foreground">إجراءات</th>
             </tr>
@@ -150,9 +142,6 @@ export function DriversTable() {
                     ) : (
                       <span className="text-sm text-muted-foreground">{driver.reason}</span>
                     )}
-                  </td>
-                  <td className="p-4">
-                    <span className="text-sm text-foreground">{driver.zone}</span>
                   </td>
                   <td className="p-4">
                     <span className="text-xs text-muted-foreground">{driver.lastUpdate}</span>
@@ -206,10 +195,6 @@ export function DriversTable() {
                     <span className="text-sm text-destructive font-medium">{driver.reason}</span>
                   </div>
                 )}
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-muted-foreground">المنطقة:</span>
-                  <span className="text-sm text-foreground">{driver.zone}</span>
-                </div>
                 <div className="flex items-center gap-2">
                   <span className="text-xs text-muted-foreground">آخر تحديث:</span>
                   <span className="text-xs text-muted-foreground">{driver.lastUpdate}</span>

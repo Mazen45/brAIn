@@ -11,7 +11,6 @@ import { ExportOptions } from './ExportOptions';
 
 export function Reports() {
   const [selectedPeriod, setSelectedPeriod] = useState('week');
-  const [selectedZone, setSelectedZone] = useState('all');
   const [selectedType, setSelectedType] = useState('all');
 
   return (
@@ -35,10 +34,8 @@ export function Reports() {
         {/* Filters */}
         <ReportsFilters
           selectedPeriod={selectedPeriod}
-          selectedZone={selectedZone}
           selectedType={selectedType}
           onPeriodChange={setSelectedPeriod}
-          onZoneChange={setSelectedZone}
           onTypeChange={setSelectedType}
         />
 

@@ -1,0 +1,99 @@
+/* Custom styling for the Leaflet-based Hebron map overlays (vehicles). */
+
+.leaflet-container {
+  width: 100%;
+  height: 100%;
+  font-family: inherit;
+  background: #e5e3df;
+}
+
+/* Vehicle marker */
+.vehicle-div-icon {
+  position: relative;
+}
+.vehicle-pin {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+  cursor: pointer;
+}
+.vehicle-pin--active {
+  background: #10b981;
+}
+.vehicle-pin--inactive {
+  background: #6b7280;
+}
+.vehicle-pin__icon {
+  font-size: 18px;
+  line-height: 1;
+  filter: grayscale(1) brightness(3);
+}
+.vehicle-pin__pulse {
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  background: #10b981;
+  animation: vehiclePulse 2s ease-out infinite;
+}
+@keyframes vehiclePulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(1.6);
+    opacity: 0;
+  }
+}
+.vehicle-pin__badge {
+  position: absolute;
+  left: 50%;
+  bottom: -10px;
+  transform: translateX(-50%);
+  padding: 1px 8px;
+  border-radius: 9999px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #ffffff;
+  white-space: nowrap;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+.vehicle-pin__badge--active {
+  background: #10b981;
+}
+.vehicle-pin__badge--inactive {
+  background: #6b7280;
+}
+
+/* Depot marker used by the Smart Routing map preview */
+.depot-pin {
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  background: #ffffff;
+  border: 2px solid #1a5c3a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+}
+
+/* Al-Minya landfill marker - the single destination outside Hebron city */
+.landfill-pin {
+  width: 30px;
+  height: 30px;
+  border-radius: 6px;
+  background: #ffffff;
+  border: 2px solid #78350f;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+}

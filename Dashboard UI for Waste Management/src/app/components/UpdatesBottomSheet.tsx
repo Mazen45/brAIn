@@ -10,7 +10,7 @@ export function UpdatesBottomSheet({ isOpen, onClose }: UpdatesBottomSheetProps)
   const updates = [
     {
       id: 1,
-      text: 'تم إعادة توزيع المنطقة الجنوبية من مركبة 3 إلى مركبة 1',
+      text: 'تم إعادة توزيع حاويات مركبة 3 إلى مركبة 1',
       time: 'منذ 5 دقائق',
       type: 'info'
     },
@@ -28,19 +28,19 @@ export function UpdatesBottomSheet({ isOpen, onClose }: UpdatesBottomSheetProps)
     },
     {
       id: 4,
-      text: 'تنبيه: تراكم عالي في المنطقة الجنوبية',
+      text: 'تنبيه: تراكم عالي في عدة حاويات',
       time: 'منذ 25 دقيقة',
       type: 'alert'
     },
     {
       id: 5,
-      text: 'تم إضافة مسار جديد للمنطقة الشرقية',
+      text: 'تم إضافة مسار جديد لمركبة 4',
       time: 'منذ 35 دقيقة',
       type: 'info'
     },
     {
       id: 6,
-      text: 'اكتمال جمع النفايات في المنطقة الشمالية',
+      text: 'اكتمال جمع النفايات لمسار مركبة 2',
       time: 'منذ ساعة',
       type: 'success'
     },
@@ -55,7 +55,7 @@ export function UpdatesBottomSheet({ isOpen, onClose }: UpdatesBottomSheetProps)
           exit={{ y: '100%' }}
           transition={{ type: 'spring', damping: 30, stiffness: 300 }}
           className="fixed bottom-0 left-0 right-0 bg-card border-t-2 border-border rounded-t-2xl shadow-2xl overflow-hidden md:h-[40vh] h-[50vh]"
-          style={{ zIndex: 50 }}
+          style={{ zIndex: 1400 }}
           dir="rtl"
         >
           {/* Header */}

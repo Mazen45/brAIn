@@ -39,7 +39,7 @@ export function VehicleTooltip({ vehicle, position, onClose }: VehicleTooltipPro
         transform: 'translate(-50%, -100%)',
         minWidth: '280px',
         direction: 'rtl',
-        zIndex: 30,
+        zIndex: 1200,
       }}
     >
       {/* Close Button */}
@@ -61,7 +61,7 @@ export function VehicleTooltip({ vehicle, position, onClose }: VehicleTooltipPro
           <Truck className={`w-5 h-5 ${isActive ? 'text-success' : 'text-muted-foreground'}`} />
         </div>
         <div className="flex-1">
-          <h4 className="font-semibold text-foreground">مركبة {vehicle.id.replace('v', '')}</h4>
+          <h4 className="font-semibold text-foreground">مركبة {vehicle.id}</h4>
           <p
             className={`text-sm font-medium mt-0.5 ${
               isActive ? 'text-success' : 'text-muted-foreground'

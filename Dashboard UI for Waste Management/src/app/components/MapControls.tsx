@@ -1,24 +1,28 @@
-import { RefreshCw, Filter, MapPin, Truck, Navigation, Clock } from 'lucide-react';
+import { RefreshCw, Truck, Navigation, Clock, Recycle } from 'lucide-react';
 import { motion } from 'motion/react';
 
 interface MapControlsProps {
-  showZones: boolean;
   showVehicles: boolean;
   showRoutes: boolean;
-  onToggleZones: () => void;
+  showContainers: boolean;
   onToggleVehicles: () => void;
   onToggleRoutes: () => void;
+  onToggleContainers: () => void;
   onOpenUpdates: () => void;
+  onRegenerateRoutes: () => void;
+  isRegeneratingRoutes: boolean;
 }
 
 export function MapControls({
-  showZones,
   showVehicles,
   showRoutes,
-  onToggleZones,
+  showContainers,
   onToggleVehicles,
   onToggleRoutes,
+  onToggleContainers,
   onOpenUpdates,
+  onRegenerateRoutes,
+  isRegeneratingRoutes,
 }: MapControlsProps) {
   return (
     <motion.div
@@ -29,9 +33,13 @@ export function MapControls({
       dir="rtl"
     >
       <div className="flex items-center gap-3 flex-wrap">
-        <button className="flex items-center gap-2 px-4 py-2.5 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-all duration-200 shadow-md hover:shadow-lg">
-          <RefreshCw className="w-4 h-4" />
-          <span className="font-medium">إعادة توليد الخطة</span>
+        <button
+          onClick={onRegenerateRoutes}
+          disabled={isRegeneratingRoutes}
+          className="flex items-center gap-2 px-4 py-2.5 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-all duration-200 shadow-md hover:shadow-lg disabled:opacity-60 disabled:cursor-not-allowed"
+        >
+          <RefreshCw className={`w-4 h-4 ${isRegeneratingRoutes ? 'animate-spin' : ''}`} />
+          <span className="font-medium">{isRegeneratingRoutes ? 'جارٍ إعادة الحساب...' : 'إعادة توليد الخطة'}</span>
         </button>
 
         <button
@@ -45,20 +53,6 @@ export function MapControls({
 
       <div className="flex items-center gap-2">
         <span className="text-sm font-medium text-muted-foreground ml-2">تصفية العرض:</span>
-
-        <button
-          onClick={onToggleZones}
-          className={`
-            flex items-center gap-2 px-3 py-2 rounded-lg border-2 transition-all duration-200
-            ${showZones
-              ? 'bg-primary/10 border-primary text-primary'
-              : 'bg-muted border-border text-muted-foreground hover:border-primary/30'
-            }
-          `}
-        >
-          <MapPin className="w-4 h-4" />
-          <span className="text-sm font-medium">المناطق</span>
-        </button>
 
         <button
           onClick={onToggleVehicles}
@@ -86,6 +80,20 @@ export function MapControls({
         >
           <Navigation className="w-4 h-4" />
           <span className="text-sm font-medium">المسارات</span>
+        </button>
+
+        <button
+          onClick={onToggleContainers}
+          className={`
+            flex items-center gap-2 px-3 py-2 rounded-lg border-2 transition-all duration-200
+            ${showContainers
+              ? 'bg-primary/10 border-primary text-primary'
+              : 'bg-muted border-border text-muted-foreground hover:border-primary/30'
+            }
+          `}
+        >
+          <Recycle className="w-4 h-4" />
+          <span className="text-sm font-medium">الحاويات</span>
         </button>
       </div>
     </motion.div>

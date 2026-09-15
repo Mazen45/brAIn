@@ -19,9 +19,8 @@ export function SmartRecommendation() {
             <TrendingUp className="w-4 h-4 text-success" />
           </div>
           <p className="text-foreground leading-relaxed">
-            يُفضل إعادة توزيع <span className="font-bold text-success">المنطقة الغربية</span> على{' '}
-            <span className="font-bold text-success">المركبة 2</span> لتقليل التأخير وتحسين وقت الاستجابة.
-            هذا التوزيع سيقلل المسافة الكلية بنسبة 15%.
+            يُفضل إعادة توزيع بعض المهام على <span className="font-bold text-success">المركبة 2</span> لتقليل
+            التأخير وتحسين وقت الاستجابة. هذا التوزيع سيقلل المسافة الكلية بنسبة 15%.
           </p>
         </div>
       </div>

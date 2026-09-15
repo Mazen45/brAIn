@@ -2,31 +2,18 @@ import { Filter } from 'lucide-react';
 import { motion } from 'motion/react';
 
 interface AnalysisFiltersProps {
-  selectedZone: string;
   selectedLevel: string;
   selectedResources: string;
-  onZoneChange: (value: string) => void;
   onLevelChange: (value: string) => void;
   onResourcesChange: (value: string) => void;
 }
 
 export function AnalysisFilters({
-  selectedZone,
   selectedLevel,
   selectedResources,
-  onZoneChange,
   onLevelChange,
   onResourcesChange,
 }: AnalysisFiltersProps) {
-  const zones = [
-    { value: 'all', label: 'جميع المناطق' },
-    { value: 'north', label: 'المنطقة الشمالية' },
-    { value: 'south', label: 'المنطقة الجنوبية' },
-    { value: 'east', label: 'المنطقة الشرقية' },
-    { value: 'west', label: 'المنطقة الغربية' },
-    { value: 'center', label: 'المنطقة الوسطى' },
-  ];
-
   const levels = [
     { value: 'all', label: 'جميع المستويات' },
     { value: 'normal', label: 'طبيعي' },
@@ -54,25 +41,7 @@ export function AnalysisFilters({
         <h3 className="font-semibold">تصفية البيانات</h3>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {/* Zone Filter */}
-        <div>
-          <label className="block text-sm font-medium text-muted-foreground mb-2">
-            تصفية حسب المنطقة
-          </label>
-          <select
-            value={selectedZone}
-            onChange={(e) => onZoneChange(e.target.value)}
-            className="w-full px-4 py-2.5 bg-input-background border-2 border-border rounded-lg focus:outline-none focus:border-primary transition-colors text-foreground"
-          >
-            {zones.map((zone) => (
-              <option key={zone.value} value={zone.value}>
-                {zone.label}
-              </option>
-            ))}
-          </select>
-        </div>
-
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Level Filter */}
         <div>
           <label className="block text-sm font-medium text-muted-foreground mb-2">

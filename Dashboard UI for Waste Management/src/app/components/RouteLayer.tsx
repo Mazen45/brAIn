@@ -1,54 +1,37 @@
-import { motion } from 'motion/react';
+import { Polyline } from 'react-leaflet';
 import { Route } from './MapView';
 
 interface RouteLayerProps {
   routes: Route[];
 }
 
+const routeStyles: Record<Route['type'], { color: string; weight: number; dashArray?: string }> = {
+  normal: { color: '#1a5c3a', weight: 3 },
+  modified: { color: '#3b82f6', weight: 3 },
+  cancelled: { color: '#94a3b8', weight: 2, dashArray: '8,4' },
+};
+
 export function RouteLayer({ routes }: RouteLayerProps) {
-  const routeStyles = {
-    normal: {
-      stroke: '#1a5c3a',
-      strokeWidth: 3,
-      strokeDasharray: '0',
-    },
-    modified: {
-      stroke: '#3b82f6',
-      strokeWidth: 3,
-      strokeDasharray: '0',
-    },
-    cancelled: {
-      stroke: '#94a3b8',
-      strokeWidth: 2,
-      strokeDasharray: '8,4',
-    },
-  };
-
   return (
-    <g>
-      {routes.map((route, index) => {
+    <>
+      {routes.map((route) => {
         const style = routeStyles[route.type];
-        const pathData = route.points
-          .map((point, i) => (i === 0 ? `M ${point.x} ${point.y}` : `L ${point.x} ${point.y}`))
-          .join(' ');
-
         return (
-          <motion.path
+          <Polyline
             key={route.id}
-            d={pathData}
-            fill="none"
-            stroke={style.stroke}
-            strokeWidth={style.strokeWidth}
-            strokeDasharray={style.strokeDasharray}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            initial={{ pathLength: 0, opacity: 0 }}
-            animate={{ pathLength: 1, opacity: 0.7 }}
-            transition={{ duration: 1.5, delay: index * 0.2, ease: 'easeInOut' }}
-            style={{ pointerEvents: 'none' }}
+            positions={route.points}
+            interactive={false}
+            pathOptions={{
+              color: route.color ?? style.color,
+              weight: style.weight,
+              dashArray: style.dashArray,
+              opacity: 0.8,
+              lineCap: 'round',
+              lineJoin: 'round',
+            }}
           />
         );
       })}
-    </g>
+    </>
   );
 }
