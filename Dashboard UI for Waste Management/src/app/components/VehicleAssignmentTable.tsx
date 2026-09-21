@@ -1,37 +1,24 @@
-import { CheckCircle, XCircle } from 'lucide-react';
+import { CheckCircle, WrenchIcon, XCircle } from 'lucide-react';
 import { motion } from 'motion/react';
+import type { Truck, TruckRoute } from '../lib/wasteRoutingTypes';
 
-export function VehicleAssignmentTable() {
-  const assignments = [
-    {
-      id: 1,
-      vehicle: 'مركبة 1',
-      driver: 'أحمد محمد',
-      tasks: 4,
-      status: 'active' as const,
-    },
-    {
-      id: 2,
-      vehicle: 'مركبة 2',
-      driver: 'سارة أحمد',
-      tasks: 2,
-      status: 'active' as const,
-    },
-    {
-      id: 3,
-      vehicle: 'مركبة 3',
-      driver: 'محمد علي',
-      tasks: 0,
-      status: 'unavailable' as const,
-    },
-    {
-      id: 4,
-      vehicle: 'مركبة 4',
-      driver: 'فاطمة حسن',
-      tasks: 1,
-      status: 'active' as const,
-    },
-  ];
+interface VehicleAssignmentTableProps {
+  trucks: Truck[];
+  routes: TruckRoute[];
+}
+
+export function VehicleAssignmentTable({ trucks, routes }: VehicleAssignmentTableProps) {
+  const assignments = trucks.map((truck) => {
+    const route = routes.find((r) => r.truck.id === truck.id);
+    const status = truck.status === 'maintenance' ? 'maintenance' : route ? 'active' : 'unavailable';
+    return {
+      id: truck.id,
+      vehicle: truck.id,
+      driver: truck.driver,
+      tasks: route?.stops.length ?? 0,
+      status: status as 'active' | 'unavailable' | 'maintenance',
+    };
+  });
 
   return (
     <motion.div
@@ -42,7 +29,7 @@ export function VehicleAssignmentTable() {
     >
       <h3 className="text-lg font-semibold mb-4">توزيع المهام على المركبات</h3>
       <p className="text-sm text-muted-foreground mb-6">
-        جدول شامل بتوزيع جميع المهام على المركبات المتاحة
+        جدول شامل بتوزيع المهام على كل مركبة في الأسطول، بحسب خطة اليوم
       </p>
 
       <div className="overflow-x-auto">
@@ -82,10 +69,15 @@ export function VehicleAssignmentTable() {
                         <CheckCircle className="w-4 h-4" />
                         <span className="text-sm font-semibold">نشط</span>
                       </div>
+                    ) : assignment.status === 'maintenance' ? (
+                      <div className="flex items-center gap-2 px-3 py-1 bg-warning/10 text-warning rounded-full">
+                        <WrenchIcon className="w-4 h-4" />
+                        <span className="text-sm font-semibold">صيانة</span>
+                      </div>
                     ) : (
                       <div className="flex items-center gap-2 px-3 py-1 bg-muted text-muted-foreground rounded-full">
                         <XCircle className="w-4 h-4" />
-                        <span className="text-sm font-semibold">غير متاح</span>
+                        <span className="text-sm font-semibold">غير مكلّفة اليوم</span>
                       </div>
                     )}
                   </div>
@@ -107,6 +99,12 @@ export function VehicleAssignmentTable() {
             <span className="text-sm text-muted-foreground">النشطة: </span>
             <span className="font-bold text-success">
               {assignments.filter((a) => a.status === 'active').length}
+            </span>
+          </div>
+          <div>
+            <span className="text-sm text-muted-foreground">قيد الصيانة: </span>
+            <span className="font-bold text-warning">
+              {assignments.filter((a) => a.status === 'maintenance').length}
             </span>
           </div>
           <div>

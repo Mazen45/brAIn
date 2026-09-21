@@ -3,11 +3,32 @@ import { AnalysisSummaryCards } from './AnalysisSummaryCards';
 import { VehicleImpactSection } from './VehicleImpactSection';
 import { SmartInsightBox } from './SmartInsightBox';
 import { AnalysisFilters } from './AnalysisFilters';
-import { useState } from 'react';
+import { ZonesList } from './ZonesList';
+import { useMemo, useState } from 'react';
+import { WASTE_ZONES } from '../lib/wasteZones';
+import type { RoutingMetrics } from '../lib/wasteRoutingTypes';
 
-export function WasteAnalysis() {
+interface WasteAnalysisProps {
+  metrics: RoutingMetrics;
+}
+
+export function WasteAnalysis({ metrics }: WasteAnalysisProps) {
   const [selectedLevel, setSelectedLevel] = useState<string>('all');
   const [selectedResources, setSelectedResources] = useState<string>('all');
+
+  const filteredZones = useMemo(
+    () =>
+      WASTE_ZONES.filter(
+        (zone) =>
+          (selectedLevel === 'all' || zone.level === selectedLevel) &&
+          (selectedResources === 'all' || zone.resourceStatus === selectedResources)
+      ),
+    [selectedLevel, selectedResources]
+  );
+
+  const criticalZonesCount = WASTE_ZONES.filter((z) => z.level === 'critical').length;
+  const delayedZonesCount = WASTE_ZONES.filter((z) => z.level === 'medium').length;
+  const hasResourceShortage = WASTE_ZONES.some((z) => z.resourceStatus === 'shortage');
 
   return (
     <div className="flex-1 overflow-auto" dir="rtl">
@@ -35,13 +56,21 @@ export function WasteAnalysis() {
         />
 
         {/* Summary Cards */}
-        <AnalysisSummaryCards />
+        <AnalysisSummaryCards
+          criticalZonesCount={criticalZonesCount}
+          delayedZonesCount={delayedZonesCount}
+          hasResourceShortage={hasResourceShortage}
+          availableVehicles={metrics.trucksUsed}
+        />
+
+        {/* Zones matching the current filter */}
+        <ZonesList zones={filteredZones} totalCount={WASTE_ZONES.length} />
 
         {/* Smart Insight Box */}
-        <SmartInsightBox />
+        <SmartInsightBox criticalZonesCount={criticalZonesCount} />
 
         {/* Vehicle Impact */}
-        <VehicleImpactSection />
+        <VehicleImpactSection metrics={metrics} />
       </div>
     </div>
   );

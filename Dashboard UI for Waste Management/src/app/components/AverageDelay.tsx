@@ -1,16 +1,17 @@
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { motion } from 'motion/react';
 import { Clock } from 'lucide-react';
+import { DELAY_BY_REASON } from '../lib/reportsData';
 
-export function AverageDelay() {
-  const data = [
-    { reason: 'غياب سائق', delay: 20 },
-    { reason: 'عطل مركبة', delay: 25 },
-    { reason: 'تأخر سابق', delay: 15 },
-    { reason: 'إعادة توزيع', delay: 10 },
-  ];
+interface AverageDelayProps {
+  selectedType: string;
+}
 
-  const averageDelay = 15;
+export function AverageDelay({ selectedType }: AverageDelayProps) {
+  const data =
+    selectedType === 'all' ? DELAY_BY_REASON : DELAY_BY_REASON.filter((r) => r.type === selectedType);
+
+  const averageDelay = Math.round(data.reduce((sum, r) => sum + r.delay, 0) / data.length);
 
   return (
     <motion.div
@@ -35,7 +36,9 @@ export function AverageDelay() {
           <span className="text-4xl font-bold text-warning">{averageDelay}</span>
           <span className="text-lg font-semibold text-warning mb-1">دقيقة</span>
         </div>
-        <p className="text-sm text-muted-foreground mt-2">متوسط التأخير العام</p>
+        <p className="text-sm text-muted-foreground mt-2">
+          {selectedType === 'all' ? 'متوسط التأخير العام' : `متوسط التأخير - ${data[0]?.reason}`}
+        </p>
       </div>
 
       <ResponsiveContainer width="100%" height={240}>

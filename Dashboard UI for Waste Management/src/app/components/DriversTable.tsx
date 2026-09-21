@@ -1,65 +1,42 @@
-import { Eye, Edit, CheckCircle, Clock, XCircle, AlertOctagon } from 'lucide-react';
+import { Eye, Edit, CheckCircle, Clock, XCircle } from 'lucide-react';
 import { motion } from 'motion/react';
+import type { Truck, TruckRoute } from '../lib/wasteRoutingTypes';
 
-export function DriversTable() {
-  const drivers = [
-    {
-      id: 1,
-      name: 'أحمد محمد',
-      vehicle: 'مركبة 1',
-      status: 'on-duty' as const,
-      reason: '-',
-      lastUpdate: 'منذ 10 دقائق',
-    },
-    {
-      id: 2,
-      name: 'سارة أحمد',
-      vehicle: 'مركبة 2',
-      status: 'on-duty' as const,
-      reason: '-',
-      lastUpdate: 'منذ 15 دقيقة',
-    },
-    {
-      id: 3,
-      name: 'محمد علي',
-      vehicle: 'مركبة 3',
-      status: 'unavailable' as const,
-      reason: 'إجازة',
-      lastUpdate: 'منذ ساعة',
-    },
-    {
-      id: 4,
-      name: 'فاطمة حسن',
-      vehicle: 'مركبة 4',
-      status: 'available' as const,
-      reason: '-',
-      lastUpdate: 'منذ 5 دقائق',
-    },
-    {
-      id: 5,
-      name: 'خالد يوسف',
-      vehicle: 'مركبة 5',
-      status: 'on-duty' as const,
-      reason: '-',
-      lastUpdate: 'منذ 20 دقيقة',
-    },
-    {
-      id: 6,
-      name: 'نور الدين',
-      vehicle: '-',
-      status: 'unavailable' as const,
-      reason: 'ظرف طارئ',
-      lastUpdate: 'منذ ساعتين',
-    },
-    {
-      id: 7,
-      name: 'ليلى حسين',
-      vehicle: 'مركبة 7',
-      status: 'available' as const,
-      reason: '-',
-      lastUpdate: 'منذ دقيقة',
-    },
-  ];
+interface DriversTableProps {
+  trucks: Truck[];
+  routes: TruckRoute[];
+}
+
+// No real timestamp source exists in the mock fleet data, so "last updated"
+// is derived deterministically from fleet order rather than invented per name.
+function relativeUpdateLabel(index: number): string {
+  const minutesAgo = 3 + index * 6;
+  if (minutesAgo < 60) return `منذ ${minutesAgo} دقيقة`;
+  return `منذ ${Math.round(minutesAgo / 60)} ساعة`;
+}
+
+export function DriversTable({ trucks, routes }: DriversTableProps) {
+  const drivers = trucks.map((truck, index) => {
+    const isOnDuty = routes.some((r) => r.truck.id === truck.id);
+    // Either the driver being absent or the vehicle being down for
+    // maintenance makes the driver "unavailable" today - they're independent
+    // real-world facts (see QuickStatusUpdate), so both are checked.
+    const isUnavailable = !truck.driverAvailable || truck.status === 'maintenance';
+    const status = isUnavailable ? 'unavailable' : isOnDuty ? 'on-duty' : 'available';
+    const reason = !truck.driverAvailable
+      ? truck.unavailabilityReason || 'غياب السائق'
+      : truck.status === 'maintenance'
+        ? 'صيانة المركبة'
+        : '-';
+    return {
+      id: truck.id,
+      name: truck.driver,
+      vehicle: truck.id,
+      status: status as 'available' | 'on-duty' | 'unavailable',
+      reason,
+      lastUpdate: relativeUpdateLabel(index),
+    };
+  });
 
   const statusConfig = {
     available: {
@@ -76,11 +53,6 @@ export function DriversTable() {
       label: 'غير متاح',
       icon: XCircle,
       classes: 'bg-muted text-muted-foreground border-border',
-    },
-    stopped: {
-      label: 'متوقف',
-      icon: AlertOctagon,
-      classes: 'bg-destructive/10 text-destructive border-destructive/30',
     },
   };
 

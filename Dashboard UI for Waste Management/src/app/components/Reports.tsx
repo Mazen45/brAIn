@@ -8,6 +8,7 @@ import { RedistributionSuccess } from './RedistributionSuccess';
 import { AverageDelay } from './AverageDelay';
 import { ReportsInsights } from './ReportsInsights';
 import { ExportOptions } from './ExportOptions';
+import { REPORT_CONTENT_ELEMENT_ID } from '../lib/reportExport';
 
 export function Reports() {
   const [selectedPeriod, setSelectedPeriod] = useState('week');
@@ -15,7 +16,7 @@ export function Reports() {
 
   return (
     <div className="flex-1 overflow-auto" dir="rtl">
-      <div className="max-w-7xl mx-auto p-6 space-y-6">
+      <div id={REPORT_CONTENT_ELEMENT_ID} className="max-w-7xl mx-auto p-6 space-y-6 bg-background">
         {/* Page Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -27,7 +28,7 @@ export function Reports() {
               <h1 className="text-3xl font-bold text-foreground mb-2">التقارير</h1>
               <p className="text-muted-foreground">تحليل أداء النظام وتأثير التغيرات التشغيلية</p>
             </div>
-            <ExportOptions />
+            <ExportOptions selectedPeriod={selectedPeriod} selectedType={selectedType} />
           </div>
         </motion.div>
 
@@ -40,7 +41,7 @@ export function Reports() {
         />
 
         {/* Key Metrics */}
-        <ReportsMetrics />
+        <ReportsMetrics selectedPeriod={selectedPeriod} />
 
         {/* Smart Insights */}
         <ReportsInsights />
@@ -51,7 +52,7 @@ export function Reports() {
           <PlanChangesChart />
 
           {/* Driver Absence Impact */}
-          <DriverAbsenceImpact />
+          <DriverAbsenceImpact selectedType={selectedType} />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -59,7 +60,7 @@ export function Reports() {
           <RedistributionSuccess />
 
           {/* Average Delay */}
-          <AverageDelay />
+          <AverageDelay selectedType={selectedType} />
         </div>
       </div>
     </div>

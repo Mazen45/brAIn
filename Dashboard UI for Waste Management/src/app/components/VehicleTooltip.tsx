@@ -1,4 +1,4 @@
-import { X, Truck, User, Navigation } from 'lucide-react';
+import { X, Truck, User, Navigation, Route as RouteIcon } from 'lucide-react';
 import { motion } from 'motion/react';
 import { Vehicle } from './MapView';
 import { useEffect, useRef } from 'react';
@@ -7,9 +7,12 @@ interface VehicleTooltipProps {
   vehicle: Vehicle;
   position: { x: number; y: number };
   onClose: () => void;
+  /** Whether the map is currently showing only this vehicle's route. */
+  isIsolated: boolean;
+  onToggleIsolate: () => void;
 }
 
-export function VehicleTooltip({ vehicle, position, onClose }: VehicleTooltipProps) {
+export function VehicleTooltip({ vehicle, position, onClose, isIsolated, onToggleIsolate }: VehicleTooltipProps) {
   const tooltipRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -89,6 +92,20 @@ export function VehicleTooltip({ vehicle, position, onClose }: VehicleTooltipPro
             <p className="text-sm font-semibold text-foreground">{vehicle.route}</p>
           </div>
         </div>
+
+        {isActive && (
+          <button
+            onClick={onToggleIsolate}
+            className={`w-full flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-semibold transition-colors ${
+              isIsolated
+                ? 'bg-primary text-primary-foreground hover:bg-primary/90'
+                : 'bg-primary/10 text-primary hover:bg-primary/20'
+            }`}
+          >
+            <RouteIcon className="w-4 h-4" />
+            {isIsolated ? 'إظهار كل المسارات' : 'عرض هذا المسار فقط'}
+          </button>
+        )}
       </div>
     </motion.div>
   );

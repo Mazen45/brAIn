@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Menu, X, LayoutDashboard, MapPin, Route, Users, FileText, AlertCircle, BarChart3 } from 'lucide-react';
+import { Menu, X, LayoutDashboard, MapPin, Route, Users, FileText, AlertCircle, BarChart3, Database } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
 interface MobileSidebarArabicProps {
@@ -12,6 +12,7 @@ export function MobileSidebarArabic({ activeItem, onItemClick }: MobileSidebarAr
 
   const menuItems = [
     { id: 'dashboard', icon: LayoutDashboard, label: 'لوحة التحكم' },
+    { id: 'data', icon: Database, label: 'بيانات النظام' },
     { id: 'map', icon: MapPin, label: 'الخريطة' },
     { id: 'analysis', icon: BarChart3, label: 'تحليل النفايات' },
     { id: 'route', icon: Route, label: 'خطة المسارات' },
@@ -55,7 +56,7 @@ export function MobileSidebarArabic({ activeItem, onItemClick }: MobileSidebarAr
             >
               <div className="p-6 border-b border-sidebar-border flex items-center justify-between">
                 <div>
-                  <h1 className="text-xl font-semibold tracking-tight">نظام إدارة النفايات</h1>
+                  <h1 className="text-xl font-semibold tracking-tight">نظام التوجيه الذكي</h1>
                   <p className="text-sm text-sidebar-foreground/70 mt-1">لوحة التحكم</p>
                 </div>
                 <button

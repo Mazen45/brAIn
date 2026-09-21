@@ -1,13 +1,16 @@
 import { CheckCircle, Clock, XCircle } from 'lucide-react';
 import { motion } from 'motion/react';
+import { REDISTRIBUTION_STATS } from '../lib/reportsData';
+
+const STAT_STYLES = [
+  { color: 'success', icon: CheckCircle },
+  { color: 'warning', icon: Clock },
+  { color: 'destructive', icon: XCircle },
+] as const;
 
 export function RedistributionSuccess() {
-  const successRate = 85;
-  const stats = [
-    { label: 'تم بنجاح', value: 85, color: 'success', icon: CheckCircle },
-    { label: 'تسبب بتأخير', value: 10, color: 'warning', icon: Clock },
-    { label: 'فشل', value: 5, color: 'destructive', icon: XCircle },
-  ];
+  const successRate = REDISTRIBUTION_STATS[0].value;
+  const stats = REDISTRIBUTION_STATS.map((stat, index) => ({ ...stat, ...STAT_STYLES[index] }));
 
   const colorClasses = {
     success: 'bg-success text-success-foreground',

@@ -55,6 +55,13 @@ export const TRUCK_COUNT = 20;
 export const CONTAINER_COUNT = 90;
 export const MAINTENANCE_TRUCK_COUNT = 3;
 
+// Driver/vehicle/active-vehicle counts are no longer separate literals here -
+// every page now derives them from the live RoutingMetrics returned by
+// planSmartRoutes() (see useSmartRoutingPlan), so they can't drift apart.
+// "Modifications today" is the one exception: the routing engine keeps no
+// change history, so this stays a small illustrative constant.
+export const PLAN_MODIFICATIONS_TODAY = 2;
+
 export function generateMockTrucks(seed = 1): Truck[] {
   const random = mulberry32(seed);
   return Array.from({ length: TRUCK_COUNT }, (_, i) => {
@@ -68,6 +75,10 @@ export function generateMockTrucks(seed = 1): Truck[] {
       capacityL: 6000 + Math.floor(random() * 4) * 1000, // 6000-9000 L
       avgSpeedKmh: 22 + Math.floor(random() * 10), // urban driving + stops
       status: isMaintenance ? 'maintenance' : 'available',
+      // Driver absence is a dispatcher-entered fact (see QuickStatusUpdate),
+      // not something worth faking randomly here - every generated truck
+      // starts with its driver present.
+      driverAvailable: true,
     };
   });
 }

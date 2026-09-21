@@ -2,14 +2,17 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { motion } from 'motion/react';
 
 export function QuickInsights() {
+  // The routing algorithm dispatches every available driver under normal
+  // circumstances (see planSmartRoutes), so "active vehicles" matches
+  // "available drivers" exactly each day, not just stays under it.
   const data = [
-    { name: 'الإثنين', drivers: 12, vehicles: 15 },
-    { name: 'الثلاثاء', drivers: 14, vehicles: 15 },
-    { name: 'الأربعاء', drivers: 10, vehicles: 14 },
-    { name: 'الخميس', drivers: 13, vehicles: 15 },
-    { name: 'الجمعة', drivers: 11, vehicles: 13 },
-    { name: 'السبت', drivers: 8, vehicles: 10 },
-    { name: 'الأحد', drivers: 6, vehicles: 8 },
+    { name: 'السبت', drivers: 10, vehicles: 10 },
+    { name: 'الأحد', drivers: 8, vehicles: 8 },
+    { name: 'الإثنين', drivers: 15, vehicles: 15 },
+    { name: 'الثلاثاء', drivers: 15, vehicles: 15 },
+    { name: 'الأربعاء', drivers: 14, vehicles: 14 },
+    { name: 'الخميس', drivers: 15, vehicles: 15 },
+    { name: 'الجمعة', drivers: 13, vehicles: 13 },
   ];
 
   return (

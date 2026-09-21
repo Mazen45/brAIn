@@ -1,7 +1,11 @@
 import { RotateCw, Users, AlertCircle } from 'lucide-react';
 import { motion } from 'motion/react';
 
-export function QuickActions() {
+interface QuickActionsProps {
+  onNavigate: (item: string) => void;
+}
+
+export function QuickActions({ onNavigate }: QuickActionsProps) {
   const actions = [
     {
       id: 'regenerate',
@@ -9,6 +13,7 @@ export function QuickActions() {
       label: 'إعادة توليد خطة المسارات',
       description: 'إنشاء مسارات محسّنة جديدة',
       color: 'primary',
+      target: 'route',
     },
     {
       id: 'drivers',
@@ -16,6 +21,7 @@ export function QuickActions() {
       label: 'عرض حالة السائقين',
       description: 'التحقق من توفر السائقين',
       color: 'secondary',
+      target: 'drivers',
     },
     {
       id: 'alerts',
@@ -23,6 +29,7 @@ export function QuickActions() {
       label: 'عرض التنبيهات',
       description: 'مراجعة إشعارات النظام',
       color: 'accent',
+      target: 'alerts',
     },
   ];
 
@@ -42,6 +49,7 @@ export function QuickActions() {
           return (
             <motion.button
               key={action.id}
+              onClick={() => onNavigate(action.target)}
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.7 + index * 0.1, duration: 0.4 }}

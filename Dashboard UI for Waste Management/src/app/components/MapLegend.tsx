@@ -74,6 +74,23 @@ export function MapLegend() {
                 </div>
               </div>
 
+              {/* Waste density heatmap */}
+              <div className="pt-2 border-t border-border/50">
+                <p className="text-xs text-muted-foreground mb-1.5 font-medium">خريطة الكثافة الحرارية:</p>
+                <div
+                  className="w-full h-2.5 rounded-full mb-1.5"
+                  style={{ background: 'linear-gradient(to left, #dc2626, #f59e0b, #10b981)' }}
+                ></div>
+                <div className="flex items-center justify-between text-xs text-muted-foreground">
+                  <span>كثافة عالية</span>
+                  <span>كثافة منخفضة</span>
+                </div>
+                <p className="text-xs text-muted-foreground leading-relaxed mt-1.5">
+                  مبنية على الحجم التقديري الحالي لكل حاوية (السعة × نسبة الامتلاء)، وليس عدد الحاويات فقط - فتُبرز
+                  المناطق التي ينتج فيها أكبر قدر من النفايات فعلياً.
+                </p>
+              </div>
+
               {/* Route colors */}
               <div className="pt-2 border-t border-border/50">
                 <p className="text-xs text-muted-foreground mb-1.5 font-medium">المسارات المحسّنة:</p>
@@ -93,6 +110,23 @@ export function MapLegend() {
                 </div>
                 <p className="text-xs text-muted-foreground leading-relaxed">
                   الطريق الوحيد خارج مدينة الخليل - لا توجد حاويات أو مناطق خدمة خارج المدينة.
+                </p>
+              </div>
+
+              {/* Road hazards */}
+              <div className="pt-2 border-t border-border/50">
+                <p className="text-xs text-muted-foreground mb-1.5 font-medium">إغلاقات الطرق:</p>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-sm">🚧</span>
+                  <span className="text-xs">إغلاق طريق - يتم تجنّبه قدر الإمكان</span>
+                </div>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  تُضاف من زر "إغلاق طريق" أعلاه، وتؤثر على اختيار المركبة والمسار المناسب لتجنّبها. خط السير
+                  المرسوم على الخريطة يُجبَر أيضاً على الالتفاف حول أي إغلاق نشِط يقع على مساره، وليس فقط تفادي
+                  اختياره في التخطيط. هذا الالتفاف تقديري (يدفع المسار جانبياً بعيداً عن الإغلاق، بمسافات متصاعدة
+                  إن لزم) وليس اعتماداً على بيانات طريق فعلية تعرف بالإغلاق - وإن كان الإغلاق يقع على الطريق
+                  الوحيد فعلياً بين نقطتين، فلا يوجد التفاف ممكن مهما كانت المسافة، تماماً كما في الواقع. يُنصح
+                  بمراجعة السائق ميدانياً عند وجود إغلاق فعلي قريب من مساره.
                 </p>
               </div>
             </div>

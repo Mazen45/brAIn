@@ -11,19 +11,47 @@ import { WasteAnalysis } from './components/WasteAnalysis';
 import { RoutePlan } from './components/RoutePlan';
 import { DriversVehicles } from './components/DriversVehicles';
 import { Reports } from './components/Reports';
+import { AlertsPage } from './components/AlertsPage';
+import { DataManagement } from './components/DataManagement';
+import { UpdatesBottomSheet } from './components/UpdatesBottomSheet';
+import { motion, AnimatePresence } from 'motion/react';
 import { Users, UserX, Truck, RefreshCw, Activity } from 'lucide-react';
+import { PLAN_MODIFICATIONS_TODAY } from './lib/wasteFleetData';
+import { useSmartRoutingPlan } from './hooks/useSmartRoutingPlan';
+import { useFleetDataSource } from './hooks/useFleetDataSource';
+import { useRoadHazards } from './hooks/useRoadHazards';
 
 export default function App() {
   const [activeItem, setActiveItem] = useState('dashboard');
+  const [isUpdatesOpen, setIsUpdatesOpen] = useState(false);
 
-  const availableDrivers = 11;
-  const unavailableDrivers = 4;
-  const activeVehicles = 13;
-  const modifiedPlans = 2;
-  const hasIssue = availableDrivers < 12;
+  // One shared fleet-data source (demo or the municipality's own entered
+  // depots/trucks/containers), one shared set of dispatcher-marked road
+  // closures/traffic jams, and one shared routing computation for the whole
+  // app - every page (dashboard, map, route plan, drivers & vehicles,
+  // alerts) reads from the same trucks/containers/plan instead of each
+  // holding its own mock data, so numbers can never drift apart between
+  // pages again.
+  const fleetDataSource = useFleetDataSource();
+  const roadHazards = useRoadHazards();
+  const smartRouting = useSmartRoutingPlan(
+    fleetDataSource.trucks,
+    fleetDataSource.containers,
+    roadHazards.hazards,
+    fleetDataSource.mode === 'demo' ? fleetDataSource.regenerateDemo : undefined
+  );
+  const { metrics, unassignedContainers } = smartRouting.plan;
+
+  const availableDrivers = metrics.availableTrucks;
+  const unavailableDrivers = metrics.driversUnavailable;
+  const activeVehicles = metrics.trucksUsed;
+  const modifiedPlans = PLAN_MODIFICATIONS_TODAY;
+  // A real operational problem: due containers the fleet couldn't fit today,
+  // rather than an arbitrary threshold on a hardcoded "available drivers" figure.
+  const hasIssue = unassignedContainers.length > 0;
 
   return (
-    <div className="size-full flex bg-background overflow-hidden">
+    <div className="size-full flex bg-background overflow-hidden" dir="rtl">
       {/* Desktop Sidebar */}
       <div className="hidden md:block">
         <SidebarArabic activeItem={activeItem} onItemClick={setActiveItem} />
@@ -34,7 +62,9 @@ export default function App() {
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col min-h-screen overflow-auto">
-        {activeItem !== 'map' && <TopNavArabic />}
+        {activeItem !== 'map' && (
+          <TopNavArabic onOpenUpdates={() => setIsUpdatesOpen(true)} dataMode={fleetDataSource.mode} />
+        )}
 
         {activeItem === 'dashboard' && (
           <main className="flex-1 p-4 md:p-8 overflow-auto" dir="rtl">
@@ -45,14 +75,14 @@ export default function App() {
                   title="السائقون المتاحون اليوم"
                   value={availableDrivers}
                   icon={Users}
-                  variant={availableDrivers < 12 ? 'warning' : 'success'}
+                  variant="success"
                   delay={0}
                 />
                 <OverviewCard
                   title="السائقون غير المتاحين"
                   value={unavailableDrivers}
                   icon={UserX}
-                  variant={unavailableDrivers > 3 ? 'warning' : 'default'}
+                  variant={unavailableDrivers > 0 ? 'warning' : 'default'}
                   delay={0.1}
                 />
                 <OverviewCard
@@ -83,7 +113,7 @@ export default function App() {
                 hasIssue={hasIssue}
                 message={
                   hasIssue
-                    ? 'تحذير: عدد السائقين المتاحين اليوم منخفض. يرجى النظر في تعديل جداول المسارات.'
+                    ? `تحذير: ${unassignedContainers.length} حاوية مستحقة لم يتم تعيينها لعدم توفر سعة كافية في الأسطول الحالي.`
                     : 'جميع الأنظمة تعمل بشكل طبيعي. عدد كافٍ من السائقين والمركبات متاحة.'
                 }
               />
@@ -94,44 +124,64 @@ export default function App() {
                   <QuickInsights />
                 </div>
                 <div>
-                  <QuickActions />
+                  <QuickActions onNavigate={setActiveItem} />
                 </div>
               </div>
             </div>
           </main>
         )}
 
-        {activeItem === 'map' && <MapView />}
+        {activeItem === 'map' && (
+          <MapView
+            smartRouting={smartRouting}
+            roadHazards={roadHazards}
+            isUpdatesOpen={isUpdatesOpen}
+            onOpenUpdates={() => setIsUpdatesOpen(true)}
+          />
+        )}
 
         {activeItem === 'analysis' && (
           <main className="flex-1 overflow-auto" dir="rtl">
-            <TopNavArabic />
-            <WasteAnalysis />
+            <WasteAnalysis metrics={metrics} />
           </main>
         )}
 
         {activeItem === 'route' && (
           <main className="flex-1 overflow-auto" dir="rtl">
-            <TopNavArabic />
-            <RoutePlan />
+            <RoutePlan smartRouting={smartRouting} />
           </main>
         )}
 
         {activeItem === 'drivers' && (
           <main className="flex-1 overflow-auto" dir="rtl">
-            <TopNavArabic />
-            <DriversVehicles />
+            <DriversVehicles smartRouting={smartRouting} fleetDataSource={fleetDataSource} />
           </main>
         )}
 
         {activeItem === 'reports' && (
           <main className="flex-1 overflow-auto" dir="rtl">
-            <TopNavArabic />
             <Reports />
           </main>
         )}
 
-        {activeItem !== 'dashboard' && activeItem !== 'map' && activeItem !== 'analysis' && activeItem !== 'route' && activeItem !== 'drivers' && activeItem !== 'reports' && (
+        {activeItem === 'alerts' && <AlertsPage metrics={metrics} />}
+
+        {activeItem === 'data' && (
+          <main className="flex-1 overflow-auto" dir="rtl">
+            <DataManagement fleetDataSource={fleetDataSource} />
+          </main>
+        )}
+
+        {![
+          'dashboard',
+          'map',
+          'analysis',
+          'route',
+          'drivers',
+          'reports',
+          'alerts',
+          'data',
+        ].includes(activeItem) && (
           <main className="flex-1 p-4 md:p-8 overflow-auto flex items-center justify-center" dir="rtl">
             <div className="text-center">
               <h3 className="text-2xl font-semibold text-foreground mb-2">قريباً</h3>
@@ -140,6 +190,22 @@ export default function App() {
           </main>
         )}
       </div>
+
+      {/* App-wide dim overlay + recent-updates sheet, reachable from the
+          notification bell on every page and from the map's own controls. */}
+      <AnimatePresence>
+        {isUpdatesOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/30"
+            style={{ zIndex: 1300 }}
+            onClick={() => setIsUpdatesOpen(false)}
+          />
+        )}
+      </AnimatePresence>
+      <UpdatesBottomSheet isOpen={isUpdatesOpen} onClose={() => setIsUpdatesOpen(false)} />
     </div>
   );
 }

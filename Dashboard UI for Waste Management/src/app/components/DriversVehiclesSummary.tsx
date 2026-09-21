@@ -1,12 +1,21 @@
 import { UserCheck, UserX, Truck, WrenchIcon } from 'lucide-react';
 import { motion } from 'motion/react';
+import type { RoutingMetrics } from '../lib/wasteRoutingTypes';
 
-export function DriversVehiclesSummary() {
+interface DriversVehiclesSummaryProps {
+  metrics: RoutingMetrics;
+}
+
+// Driver absence and vehicle maintenance are independent real facts (see
+// QuickStatusUpdate/Truck.driverAvailable) - a driver can be out while their
+// truck is fine, or the reverse - so they're tracked and shown separately
+// instead of assuming one always implies the other.
+export function DriversVehiclesSummary({ metrics }: DriversVehiclesSummaryProps) {
   const cards = [
     {
       id: 1,
       title: 'السائقين المتاحين',
-      value: 11,
+      value: metrics.availableTrucks,
       icon: UserCheck,
       color: 'success' as const,
       delay: 0,
@@ -14,7 +23,7 @@ export function DriversVehiclesSummary() {
     {
       id: 2,
       title: 'السائقين غير المتاحين',
-      value: 4,
+      value: metrics.driversUnavailable,
       icon: UserX,
       color: 'muted' as const,
       delay: 0.1,
@@ -22,7 +31,7 @@ export function DriversVehiclesSummary() {
     {
       id: 3,
       title: 'المركبات العاملة',
-      value: 13,
+      value: metrics.trucksUsed,
       icon: Truck,
       color: 'success' as const,
       delay: 0.2,
@@ -30,7 +39,7 @@ export function DriversVehiclesSummary() {
     {
       id: 4,
       title: 'المركبات خارج الخدمة',
-      value: 2,
+      value: metrics.vehiclesOutOfService,
       icon: WrenchIcon,
       color: 'destructive' as const,
       delay: 0.3,

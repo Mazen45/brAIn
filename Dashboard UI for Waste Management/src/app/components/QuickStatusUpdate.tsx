@@ -1,43 +1,61 @@
 import { useState } from 'react';
 import { Edit, Save } from 'lucide-react';
 import { motion } from 'motion/react';
+import { useToast } from '../hooks/useToast';
+import { Toast } from './Toast';
+import type { Truck } from '../lib/wasteRoutingTypes';
 
-export function QuickStatusUpdate() {
-  const [selectedDriver, setSelectedDriver] = useState('');
+interface QuickStatusUpdateProps {
+  trucks: Truck[];
+  onUpdateDriverAvailability: (truckId: string, available: boolean, reason?: string) => void;
+  onUpdateVehicleStatus: (truckId: string, status: Truck['status']) => void;
+}
+
+const DRIVER_STATUSES = [
+  { value: 'available', label: 'متاح' },
+  { value: 'unavailable', label: 'غير متاح (غياب)' },
+] as const;
+
+const VEHICLE_STATUSES = [
+  { value: 'available', label: 'تعمل' },
+  { value: 'maintenance', label: 'قيد الصيانة' },
+] as const;
+
+export function QuickStatusUpdate({ trucks, onUpdateDriverAvailability, onUpdateVehicleStatus }: QuickStatusUpdateProps) {
+  const [selectedDriverTruckId, setSelectedDriverTruckId] = useState('');
   const [driverStatus, setDriverStatus] = useState('');
-  const [selectedVehicle, setSelectedVehicle] = useState('');
+  const [selectedVehicleTruckId, setSelectedVehicleTruckId] = useState('');
   const [vehicleStatus, setVehicleStatus] = useState('');
   const [reason, setReason] = useState('');
 
-  const drivers = [
-    'أحمد محمد',
-    'سارة أحمد',
-    'محمد علي',
-    'فاطمة حسن',
-    'خالد يوسف',
-  ];
-
-  const vehicles = [
-    'مركبة 1',
-    'مركبة 2',
-    'مركبة 3',
-    'مركبة 4',
-    'مركبة 5',
-  ];
-
-  const statuses = [
-    { value: 'available', label: 'متاح' },
-    { value: 'unavailable', label: 'غير متاح' },
-    { value: 'on-duty', label: 'في مهمة' },
-    { value: 'stopped', label: 'متوقف' },
-  ];
+  const { message, showToast } = useToast();
 
   const handleSave = () => {
-    alert('تم حفظ التحديث بنجاح');
-    // Reset form
-    setSelectedDriver('');
+    let updated = false;
+
+    if (selectedDriverTruckId && driverStatus) {
+      onUpdateDriverAvailability(
+        selectedDriverTruckId,
+        driverStatus === 'available',
+        driverStatus === 'unavailable' ? reason || undefined : undefined
+      );
+      updated = true;
+    }
+
+    if (selectedVehicleTruckId && vehicleStatus) {
+      onUpdateVehicleStatus(selectedVehicleTruckId, vehicleStatus as Truck['status']);
+      updated = true;
+    }
+
+    if (!updated) {
+      showToast('يرجى اختيار سائق أو مركبة وحالتها الجديدة أولاً');
+      return;
+    }
+
+    showToast('تم حفظ التحديث بنجاح');
+    setSelectedDriverTruckId('');
     setDriverStatus('');
-    setSelectedVehicle('');
+    setSelectedVehicleTruckId('');
     setVehicleStatus('');
     setReason('');
   };
@@ -49,6 +67,7 @@ export function QuickStatusUpdate() {
       transition={{ delay: 0.5, duration: 0.5 }}
       className="bg-card rounded-xl border-2 border-border p-6 shadow-lg"
     >
+      <Toast message={message} />
       <div className="flex items-center gap-3 mb-6">
         <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
           <Edit className="w-5 h-5 text-primary" />
@@ -69,14 +88,14 @@ export function QuickStatusUpdate() {
               اختر السائق
             </label>
             <select
-              value={selectedDriver}
-              onChange={(e) => setSelectedDriver(e.target.value)}
+              value={selectedDriverTruckId}
+              onChange={(e) => setSelectedDriverTruckId(e.target.value)}
               className="w-full px-4 py-2.5 bg-input-background border-2 border-border rounded-lg focus:outline-none focus:border-primary transition-colors text-foreground"
             >
               <option value="">-- اختر السائق --</option>
-              {drivers.map((driver) => (
-                <option key={driver} value={driver}>
-                  {driver}
+              {trucks.map((truck) => (
+                <option key={truck.id} value={truck.id}>
+                  {truck.driver} ({truck.id})
                 </option>
               ))}
             </select>
@@ -92,7 +111,7 @@ export function QuickStatusUpdate() {
               className="w-full px-4 py-2.5 bg-input-background border-2 border-border rounded-lg focus:outline-none focus:border-primary transition-colors text-foreground"
             >
               <option value="">-- اختر الحالة --</option>
-              {statuses.map((status) => (
+              {DRIVER_STATUSES.map((status) => (
                 <option key={status.value} value={status.value}>
                   {status.label}
                 </option>
@@ -110,14 +129,14 @@ export function QuickStatusUpdate() {
               اختر المركبة
             </label>
             <select
-              value={selectedVehicle}
-              onChange={(e) => setSelectedVehicle(e.target.value)}
+              value={selectedVehicleTruckId}
+              onChange={(e) => setSelectedVehicleTruckId(e.target.value)}
               className="w-full px-4 py-2.5 bg-input-background border-2 border-border rounded-lg focus:outline-none focus:border-primary transition-colors text-foreground"
             >
               <option value="">-- اختر المركبة --</option>
-              {vehicles.map((vehicle) => (
-                <option key={vehicle} value={vehicle}>
-                  {vehicle}
+              {trucks.map((truck) => (
+                <option key={truck.id} value={truck.id}>
+                  {truck.id} - {truck.driver}
                 </option>
               ))}
             </select>
@@ -133,7 +152,7 @@ export function QuickStatusUpdate() {
               className="w-full px-4 py-2.5 bg-input-background border-2 border-border rounded-lg focus:outline-none focus:border-primary transition-colors text-foreground"
             >
               <option value="">-- اختر الحالة --</option>
-              {statuses.map((status) => (
+              {VEHICLE_STATUSES.map((status) => (
                 <option key={status.value} value={status.value}>
                   {status.label}
                 </option>
@@ -143,16 +162,16 @@ export function QuickStatusUpdate() {
         </div>
       </div>
 
-      {/* Reason Field */}
+      {/* Reason Field - applies to driver absence, shown in the drivers table */}
       <div className="mt-4">
         <label className="block text-sm font-medium text-muted-foreground mb-2">
-          سبب الحالة (اختياري)
+          سبب غياب السائق (اختياري)
         </label>
         <input
           type="text"
           value={reason}
           onChange={(e) => setReason(e.target.value)}
-          placeholder="مثال: إجازة، عطل، صيانة..."
+          placeholder="مثال: إجازة، ظرف طارئ..."
           className="w-full px-4 py-2.5 bg-input-background border-2 border-border rounded-lg focus:outline-none focus:border-primary transition-colors text-foreground placeholder:text-muted-foreground"
         />
       </div>

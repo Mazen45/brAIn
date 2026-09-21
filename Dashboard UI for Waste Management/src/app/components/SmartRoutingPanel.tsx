@@ -5,6 +5,7 @@ import {
   ChevronDown,
   ChevronUp,
   Gauge,
+  MapPinned,
   Recycle,
   RefreshCw,
   Route as RouteIcon,
@@ -14,20 +15,20 @@ import {
 import { COLLECTION_THRESHOLD_PERCENT } from '../lib/smartRouting';
 import { routeColor } from '../lib/routeColors';
 import { depotIcon } from '../lib/mapIcons';
-import { useSmartRoutingPlan } from '../hooks/useSmartRoutingPlan';
+import type { SmartRoutingPlanState } from '../hooks/useSmartRoutingPlan';
 import { HEBRON_CENTER } from './mapGeo';
 import { containerColor } from './WasteContainerMarker';
 
-export function SmartRoutingPanel() {
+export function SmartRoutingPanel({
+  containers,
+  plan,
+  roadGeometry,
+  isResolvingRoads,
+  isRegenerating,
+  regenerate,
+  isUsingRealRoadDistances,
+}: SmartRoutingPlanState) {
   const [expandedTruckId, setExpandedTruckId] = useState<string | null>(null);
-  const {
-    containers,
-    plan,
-    roadGeometry,
-    isResolvingRoads,
-    isRegenerating,
-    regenerate,
-  } = useSmartRoutingPlan();
 
   const depots = useMemo(() => {
     const seen = new Map<string, (typeof plan.routes)[number]['truck']>();
@@ -70,7 +71,10 @@ export function SmartRoutingPanel() {
     {
       title: 'توفير في المسافة',
       value: `${Math.max(0, metrics.distanceSavedPercent).toFixed(0)}%`,
-      sub: `و ${metrics.trucksSavedCount} مركبة أقل مقارنة بالخطة التقليدية`,
+      sub:
+        metrics.trucksSavedCount > 0
+          ? `و ${metrics.trucksSavedCount} مركبة أقل مقارنة بالخطة التقليدية`
+          : 'بنفس عدد المركبات المستخدمة تقليدياً، عبر ترتيب أفضل للتوقفات',
       icon: Gauge,
       color: 'success' as const,
     },
@@ -115,14 +119,26 @@ export function SmartRoutingPanel() {
               معروضة أيضاً على الخريطة الرئيسية.
             </p>
           </div>
-          <button
-            onClick={handleRecalculate}
-            disabled={isRegenerating}
-            className="flex items-center gap-2 px-4 py-2.5 bg-primary text-primary-foreground rounded-lg font-semibold shadow-md hover:opacity-90 transition-opacity disabled:opacity-60 disabled:cursor-not-allowed"
-          >
-            <RefreshCw className={`w-4 h-4 ${isRegenerating ? 'animate-spin' : ''}`} />
-            {isRegenerating ? 'جارٍ إعادة الحساب...' : 'إعادة حساب المسارات'}
-          </button>
+          <div className="flex flex-col items-end gap-2">
+            <button
+              onClick={handleRecalculate}
+              disabled={isRegenerating}
+              className="flex items-center gap-2 px-4 py-2.5 bg-primary text-primary-foreground rounded-lg font-semibold shadow-md hover:opacity-90 transition-opacity disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              <RefreshCw className={`w-4 h-4 ${isRegenerating ? 'animate-spin' : ''}`} />
+              {isRegenerating ? 'جارٍ إعادة الحساب...' : 'إعادة حساب المسارات'}
+            </button>
+            <span
+              className={`flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full ${
+                isUsingRealRoadDistances ? 'bg-success/10 text-success' : 'bg-muted text-muted-foreground'
+              }`}
+            >
+              <MapPinned className="w-3 h-3" />
+              {isUsingRealRoadDistances
+                ? 'التوزيع محسوب على مسافات الطرق الفعلية'
+                : 'التوزيع محسوب على الخط المستقيم (جارٍ جلب مسافات الطرق أو الأسطول كبير جداً)'}
+            </span>
+          </div>
         </div>
       </motion.div>
 

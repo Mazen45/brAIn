@@ -1,5 +1,13 @@
 export const HEBRON_CENTER: [number, number] = [31.5326, 35.0998];
 
+// The map's initial viewport centers here instead of HEBRON_CENTER - biased
+// toward the western/central part of the fleet's operating area (see
+// wasteFleetData.ts's BOUNDS) and away from the Kiryat Arba settlement,
+// which sits only ~1km east of HEBRON_CENTER itself. At the low zoom needed
+// to see the whole fleet at once, a view centered on HEBRON_CENTER would
+// otherwise put the settlement in frame by default.
+export const MAP_DEFAULT_VIEW_CENTER: [number, number] = [31.53, 35.088];
+
 // There are no waste containers or collection zones outside Hebron city -
 // the Al-Minya sanitary landfill (مكب المنية), near Al-Maniya village in
 // Bethlehem governorate, is the single destination trucks ever drive to

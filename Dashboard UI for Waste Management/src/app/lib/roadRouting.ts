@@ -1,10 +1,13 @@
 import { LatLng } from './wasteRoutingTypes';
 
-// Public OSRM demo routing server - resolves a multi-stop driving route that
-// follows the real road network. Waypoint order is preserved (this service
-// does not reorder stops; our own smart-routing algorithm already picked the
-// optimal visiting order, we just need the actual streets between them).
-const OSRM_BASE = 'https://router.project-osrm.org/route/v1/driving';
+// Public OSRM demo routing server.
+const OSRM_HOST = 'https://router.project-osrm.org';
+
+// Resolves a multi-stop driving route that follows the real road network.
+// Waypoint order is preserved (this service does not reorder stops; our own
+// smart-routing algorithm already picked the optimal visiting order, we just
+// need the actual streets between them).
+const OSRM_BASE = `${OSRM_HOST}/route/v1/driving`;
 
 const roadRouteCache = new Map<string, LatLng[]>();
 
@@ -61,6 +64,59 @@ export async function fetchRoadRoutesLimited<T>(
       if (!item) return;
       const path = await fetchRoadRoute(getWaypoints(item));
       onResolved(item, path);
+    }
+  }
+
+  await Promise.all(Array.from({ length: Math.min(concurrency, items.length) }, worker));
+}
+
+const nearestRoadCache = new Map<string, LatLng>();
+
+/**
+ * Snaps a point to the nearest drivable road via OSRM's Nearest service, so
+ * mock container positions (dropped at a random lat/lng) end up on an actual
+ * street instead of inside a building block a truck could never reach. Falls
+ * back to the original point if the service is unreachable.
+ */
+export async function fetchNearestRoadPoint(point: LatLng): Promise<LatLng> {
+  const key = point.map((c) => c.toFixed(5)).join(',');
+  const cached = nearestRoadCache.get(key);
+  if (cached) return cached;
+
+  const [lat, lng] = point;
+  const url = `${OSRM_HOST}/nearest/v1/driving/${lng},${lat}`;
+
+  try {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`OSRM nearest request failed with status ${response.status}`);
+    const data = await response.json();
+    const location: [number, number] | undefined = data?.waypoints?.[0]?.location;
+    if (!location) throw new Error('OSRM returned no nearest-road match');
+
+    const snapped: LatLng = [location[1], location[0]];
+    nearestRoadCache.set(key, snapped);
+    return snapped;
+  } catch {
+    nearestRoadCache.set(key, point);
+    return point;
+  }
+}
+
+/** Runs fetchNearestRoadPoint over many points with limited concurrency. */
+export async function fetchNearestRoadPointsLimited<T>(
+  items: T[],
+  getPoint: (item: T) => LatLng,
+  onResolved: (item: T, point: LatLng) => void,
+  concurrency = 5
+): Promise<void> {
+  const queue = [...items];
+
+  async function worker() {
+    while (queue.length > 0) {
+      const item = queue.shift();
+      if (!item) return;
+      const point = await fetchNearestRoadPoint(getPoint(item));
+      onResolved(item, point);
     }
   }
 

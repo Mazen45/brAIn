@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { motion } from 'motion/react';
 import { RouteSummaryCards } from './RouteSummaryCards';
 import { RouteActions } from './RouteActions';
@@ -6,21 +5,20 @@ import { VehicleAssignmentTable } from './VehicleAssignmentTable';
 import { ChangeReasons } from './ChangeReasons';
 import { SmartRecommendation } from './SmartRecommendation';
 import { SmartRoutingPanel } from './SmartRoutingPanel';
+import { Toast } from './Toast';
+import { useToast } from '../hooks/useToast';
+import type { SmartRoutingPlanState } from '../hooks/useSmartRoutingPlan';
 
-export function RoutePlan() {
-  const [isRegenerating, setIsRegenerating] = useState(false);
+interface RoutePlanProps {
+  smartRouting: SmartRoutingPlanState;
+}
 
-  const handleRegenerate = () => {
-    setIsRegenerating(true);
-    // Simulate API call
-    setTimeout(() => {
-      setIsRegenerating(false);
-    }, 2000);
-  };
+export function RoutePlan({ smartRouting }: RoutePlanProps) {
+  const { message, showToast } = useToast();
 
   const handleApprove = () => {
     // Handle approval
-    alert('تم اعتماد الخطة بنجاح');
+    showToast('تم اعتماد الخطة بنجاح');
   };
 
   return (
@@ -40,15 +38,15 @@ export function RoutePlan() {
               </p>
             </div>
             <RouteActions
-              onRegenerate={handleRegenerate}
+              onRegenerate={smartRouting.regenerate}
               onApprove={handleApprove}
-              isRegenerating={isRegenerating}
+              isRegenerating={smartRouting.isRegenerating}
             />
           </div>
         </motion.div>
 
         {/* Summary Cards */}
-        <RouteSummaryCards />
+        <RouteSummaryCards metrics={smartRouting.plan.metrics} />
 
         {/* Smart Recommendation */}
         <SmartRecommendation />
@@ -57,13 +55,15 @@ export function RoutePlan() {
         <ChangeReasons />
 
         {/* Vehicle Assignment Table */}
-        <VehicleAssignmentTable />
+        <VehicleAssignmentTable trucks={smartRouting.trucks} routes={smartRouting.plan.routes} />
 
         {/* Smart Routing Engine */}
         <div className="pt-4 border-t-2 border-border">
-          <SmartRoutingPanel />
+          <SmartRoutingPanel {...smartRouting} />
         </div>
       </div>
+
+      <Toast message={message} />
     </div>
   );
 }

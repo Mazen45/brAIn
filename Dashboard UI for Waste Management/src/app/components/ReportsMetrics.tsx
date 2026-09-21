@@ -1,12 +1,21 @@
 import { RefreshCw, TrendingUp, Clock, AlertTriangle } from 'lucide-react';
 import { motion } from 'motion/react';
+import { modificationsForPeriod, DELAY_BY_REASON, REDISTRIBUTION_STATS } from '../lib/reportsData';
 
-export function ReportsMetrics() {
+interface ReportsMetricsProps {
+  selectedPeriod: string;
+}
+
+const overallAverageDelay = Math.round(
+  DELAY_BY_REASON.reduce((sum, r) => sum + r.delay, 0) / DELAY_BY_REASON.length
+);
+
+export function ReportsMetrics({ selectedPeriod }: ReportsMetricsProps) {
   const metrics = [
     {
       id: 1,
       title: 'عدد مرات تعديل الخطة',
-      value: '12',
+      value: String(modificationsForPeriod(selectedPeriod)),
       suffix: 'تعديل',
       icon: RefreshCw,
       color: 'primary' as const,
@@ -15,7 +24,7 @@ export function ReportsMetrics() {
     {
       id: 2,
       title: 'نسبة نجاح إعادة التوزيع',
-      value: '85',
+      value: String(REDISTRIBUTION_STATS[0].value),
       suffix: '%',
       icon: TrendingUp,
       color: 'success' as const,
@@ -24,7 +33,7 @@ export function ReportsMetrics() {
     {
       id: 3,
       title: 'متوسط التأخير',
-      value: '15',
+      value: String(overallAverageDelay),
       suffix: 'دقيقة',
       icon: Clock,
       color: 'warning' as const,

@@ -1,11 +1,22 @@
 import { TrendingDown, CheckCircle2, XCircle } from 'lucide-react';
 import { motion } from 'motion/react';
+import type { RoutingMetrics } from '../lib/wasteRoutingTypes';
 
-export function VehicleImpactSection() {
-  const requiredVehicles = 15;
-  const availableVehicles = 11;
-  const coveragePercent = Math.round((availableVehicles / requiredVehicles) * 100);
-  const hasShortage = availableVehicles < requiredVehicles;
+interface VehicleImpactSectionProps {
+  metrics: RoutingMetrics;
+}
+
+// Every available truck is dispatched under normal circumstances (see
+// planSmartRoutes), so "do we have enough vehicles" is no longer a
+// meaningful question - the fleet is always maxed out already. The
+// question that can actually go wrong is whether that full fleet has
+// enough capacity to collect everything due today.
+export function VehicleImpactSection({ metrics }: VehicleImpactSectionProps) {
+  const coveragePercent =
+    metrics.dueContainers > 0
+      ? Math.round((metrics.collectedContainers / metrics.dueContainers) * 100)
+      : 100;
+  const hasShortage = metrics.collectedContainers < metrics.dueContainers;
 
   return (
     <motion.div
@@ -19,22 +30,24 @@ export function VehicleImpactSection() {
           <TrendingDown className="w-5 h-5 text-warning" />
         </div>
         <div>
-          <h3 className="text-lg font-semibold">تأثير نقص المركبات</h3>
-          <p className="text-sm text-muted-foreground">تحليل الفجوة بين المطلوب والمتاح</p>
+          <h3 className="text-lg font-semibold">تأثير سعة الأسطول</h3>
+          <p className="text-sm text-muted-foreground">
+            تغطية الحاويات المستحقة بكامل الأسطول المتاح ({metrics.availableTrucks} مركبة)
+          </p>
         </div>
       </div>
 
       <div className="space-y-4">
-        {/* Required vs Available */}
+        {/* Due vs Collected */}
         <div className="space-y-3">
           <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg">
-            <span className="text-sm font-medium text-muted-foreground">عدد المركبات المطلوبة</span>
-            <span className="text-2xl font-bold text-foreground">{requiredVehicles}</span>
+            <span className="text-sm font-medium text-muted-foreground">الحاويات المستحقة اليوم</span>
+            <span className="text-2xl font-bold text-foreground">{metrics.dueContainers}</span>
           </div>
 
           <div className="flex items-center justify-between p-4 bg-success/10 rounded-lg border border-success/20">
-            <span className="text-sm font-medium text-success">عدد المركبات المتاحة</span>
-            <span className="text-2xl font-bold text-success">{availableVehicles}</span>
+            <span className="text-sm font-medium text-success">الحاويات التي تم جمعها</span>
+            <span className="text-2xl font-bold text-success">{metrics.collectedContainers}</span>
           </div>
 
           <div className="flex items-center justify-between p-4 bg-primary/10 rounded-lg border border-primary/20">
@@ -70,8 +83,8 @@ export function VehicleImpactSection() {
           )}
           <p className={`text-sm font-medium ${hasShortage ? 'text-warning' : 'text-success'}`}>
             {hasShortage
-              ? 'يوجد نقص يؤثر على سرعة جمع النفايات'
-              : 'التغطية الحالية كافية'}
+              ? 'سعة الأسطول الحالية غير كافية لتغطية كل الحاويات المستحقة اليوم'
+              : 'الأسطول المتاح يغطي جميع الحاويات المستحقة اليوم'}
           </p>
         </div>
       </div>

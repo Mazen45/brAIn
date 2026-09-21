@@ -1,17 +1,10 @@
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { motion } from 'motion/react';
 import { TrendingUp } from 'lucide-react';
+import { PLAN_CHANGES_BY_DAY } from '../lib/reportsData';
 
 export function PlanChangesChart() {
-  const data = [
-    { day: 'السبت', changes: 3 },
-    { day: 'الأحد', changes: 2 },
-    { day: 'الإثنين', changes: 5 },
-    { day: 'الثلاثاء', changes: 4 },
-    { day: 'الأربعاء', changes: 6 },
-    { day: 'الخميس', changes: 3 },
-    { day: 'الجمعة', changes: 2 },
-  ];
+  const data = PLAN_CHANGES_BY_DAY;
 
   return (
     <motion.div

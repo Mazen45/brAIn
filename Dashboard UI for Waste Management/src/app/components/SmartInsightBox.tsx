@@ -1,7 +1,11 @@
 import { Lightbulb } from 'lucide-react';
 import { motion } from 'motion/react';
 
-export function SmartInsightBox() {
+interface SmartInsightBoxProps {
+  criticalZonesCount: number;
+}
+
+export function SmartInsightBox({ criticalZonesCount }: SmartInsightBoxProps) {
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
@@ -16,7 +20,7 @@ export function SmartInsightBox() {
         <div className="flex-1">
           <h3 className="font-semibold text-lg text-primary mb-2">تحليل ذكي</h3>
           <p className="text-foreground leading-relaxed">
-            بسبب نقص عدد المركبات، هناك <span className="font-bold text-warning">3 مناطق</span> معرضة للتأخير خلال الساعات القادمة. يُنصح بإعادة توزيع المركبات أو تعديل المسارات للتقليل من التأخير.
+            بسبب نقص عدد المركبات، هناك <span className="font-bold text-warning">{criticalZonesCount} مناطق</span> معرضة للتأخير خلال الساعات القادمة. يُنصح بإعادة توزيع المركبات أو تعديل المسارات للتقليل من التأخير.
           </p>
         </div>
       </div>

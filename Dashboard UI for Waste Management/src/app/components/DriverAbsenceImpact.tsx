@@ -1,17 +1,16 @@
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { motion } from 'motion/react';
 import { UserX } from 'lucide-react';
+import { DRIVER_ABSENCE_BY_DAY } from '../lib/reportsData';
 
-export function DriverAbsenceImpact() {
-  const data = [
-    { day: 'السبت', absent: 2, delay: 8 },
-    { day: 'الأحد', absent: 1, delay: 5 },
-    { day: 'الإثنين', absent: 4, delay: 18 },
-    { day: 'الثلاثاء', absent: 3, delay: 12 },
-    { day: 'الأربعاء', absent: 4, delay: 20 },
-    { day: 'الخميس', absent: 2, delay: 10 },
-    { day: 'الجمعة', absent: 1, delay: 6 },
-  ];
+interface DriverAbsenceImpactProps {
+  selectedType: string;
+}
+
+export function DriverAbsenceImpact({ selectedType }: DriverAbsenceImpactProps) {
+  const isApplicable = selectedType === 'all' || selectedType === 'driver';
+
+  const data = DRIVER_ABSENCE_BY_DAY;
 
   return (
     <motion.div
@@ -30,46 +29,54 @@ export function DriverAbsenceImpact() {
         </div>
       </div>
 
-      <ResponsiveContainer width="100%" height={280}>
-        <BarChart data={data}>
-          <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.05)" />
-          <XAxis
-            dataKey="day"
-            tick={{ fill: '#64748b', fontSize: 12 }}
-            axisLine={{ stroke: 'rgba(0,0,0,0.1)' }}
-          />
-          <YAxis
-            tick={{ fill: '#64748b', fontSize: 12 }}
-            axisLine={{ stroke: 'rgba(0,0,0,0.1)' }}
-          />
-          <Tooltip
-            contentStyle={{
-              backgroundColor: '#ffffff',
-              border: '1px solid rgba(0,0,0,0.1)',
-              borderRadius: '8px',
-              boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
-            }}
-          />
-          <Legend
-            wrapperStyle={{ paddingTop: '20px' }}
-            formatter={(value) => {
-              const labels: Record<string, string> = {
-                absent: 'سائقين غائبين',
-                delay: 'التأخير (دقيقة)',
-              };
-              return labels[value] || value;
-            }}
-          />
-          <Bar key="absent-bar" dataKey="absent" fill="#f59e0b" radius={[8, 8, 0, 0]} />
-          <Bar key="delay-bar" dataKey="delay" fill="#dc2626" radius={[8, 8, 0, 0]} />
-        </BarChart>
-      </ResponsiveContainer>
+      {isApplicable ? (
+        <>
+          <ResponsiveContainer width="100%" height={280}>
+            <BarChart data={data}>
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.05)" />
+              <XAxis
+                dataKey="day"
+                tick={{ fill: '#64748b', fontSize: 12 }}
+                axisLine={{ stroke: 'rgba(0,0,0,0.1)' }}
+              />
+              <YAxis
+                tick={{ fill: '#64748b', fontSize: 12 }}
+                axisLine={{ stroke: 'rgba(0,0,0,0.1)' }}
+              />
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: '#ffffff',
+                  border: '1px solid rgba(0,0,0,0.1)',
+                  borderRadius: '8px',
+                  boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+                }}
+              />
+              <Legend
+                wrapperStyle={{ paddingTop: '20px' }}
+                formatter={(value) => {
+                  const labels: Record<string, string> = {
+                    absent: 'سائقين غائبين',
+                    delay: 'التأخير (دقيقة)',
+                  };
+                  return labels[value] || value;
+                }}
+              />
+              <Bar key="absent-bar" dataKey="absent" fill="#f59e0b" radius={[8, 8, 0, 0]} />
+              <Bar key="delay-bar" dataKey="delay" fill="#dc2626" radius={[8, 8, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
 
-      <div className="mt-4 p-3 bg-warning/5 border border-warning/20 rounded-lg">
-        <p className="text-sm text-warning font-medium">
-          زيادة غياب السائقين تؤدي إلى ارتفاع التأخير بشكل ملحوظ
+          <div className="mt-4 p-3 bg-warning/5 border border-warning/20 rounded-lg">
+            <p className="text-sm text-warning font-medium">
+              زيادة غياب السائقين تؤدي إلى ارتفاع التأخير بشكل ملحوظ
+            </p>
+          </div>
+        </>
+      ) : (
+        <p className="text-sm text-muted-foreground text-center py-12">
+          هذا الرسم خاص بتعديلات غياب السائقين - اختر "غياب سائق" أو "جميع التعديلات" لعرضه
         </p>
-      </div>
+      )}
     </motion.div>
   );
 }

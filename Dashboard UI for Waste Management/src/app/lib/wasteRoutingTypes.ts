@@ -19,7 +19,15 @@ export interface Truck {
   depotName: string;
   capacityL: number;
   avgSpeedKmh: number;
+  /** Mechanical status of the vehicle itself. */
   status: 'available' | 'maintenance';
+  /** Whether this truck's driver is present today - independent of the
+   * vehicle's own mechanical status: a driver can be absent while the truck
+   * is fine, or vice versa. A truck can only be dispatched when both are true. */
+  driverAvailable: boolean;
+  /** Dispatcher-entered reason for the current unavailability (driver absence
+   * or maintenance), if one was given - see QuickStatusUpdate. */
+  unavailabilityReason?: string;
 }
 
 export interface RouteStop {
@@ -40,7 +48,12 @@ export interface TruckRoute {
 
 export interface RoutingMetrics {
   totalTrucks: number;
+  /** Trucks that are both mechanically available AND have their driver present today. */
   availableTrucks: number;
+  /** Trucks whose driver is absent today, regardless of the vehicle's own mechanical status. */
+  driversUnavailable: number;
+  /** Trucks under maintenance, regardless of whether their driver is present. */
+  vehiclesOutOfService: number;
   trucksUsed: number;
   totalContainers: number;
   dueContainers: number;

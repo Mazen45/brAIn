@@ -1,4 +1,4 @@
-import { LayoutDashboard, MapPin, Route, Users, FileText, AlertCircle, BarChart3 } from 'lucide-react';
+import { LayoutDashboard, MapPin, Route, Users, FileText, AlertCircle, BarChart3, Database } from 'lucide-react';
 
 interface SidebarArabicProps {
   activeItem: string;
@@ -8,6 +8,7 @@ interface SidebarArabicProps {
 export function SidebarArabic({ activeItem, onItemClick }: SidebarArabicProps) {
   const menuItems = [
     { id: 'dashboard', icon: LayoutDashboard, label: 'لوحة التحكم' },
+    { id: 'data', icon: Database, label: 'بيانات النظام' },
     { id: 'map', icon: MapPin, label: 'الخريطة' },
     { id: 'analysis', icon: BarChart3, label: 'تحليل النفايات' },
     { id: 'route', icon: Route, label: 'خطة المسارات' },
@@ -19,7 +20,7 @@ export function SidebarArabic({ activeItem, onItemClick }: SidebarArabicProps) {
   return (
     <aside className="w-64 bg-sidebar text-sidebar-foreground h-full flex flex-col shadow-xl" dir="rtl">
       <div className="p-6 border-b border-sidebar-border">
-        <h1 className="text-xl font-semibold tracking-tight">نظام إدارة النفايات</h1>
+        <h1 className="text-xl font-semibold tracking-tight">نظام التوجيه الذكي</h1>
         <p className="text-sm text-sidebar-foreground/70 mt-1">لوحة التحكم</p>
       </div>
 

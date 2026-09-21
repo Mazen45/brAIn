@@ -1,6 +1,6 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import type { LeafletMouseEvent } from 'leaflet';
+import type { LatLng as LeafletLatLng, LatLngBoundsExpression, LeafletMouseEvent } from 'leaflet';
 import {
   MapContainer,
   Marker,
@@ -8,20 +8,46 @@ import {
   TileLayer,
   Tooltip as LeafletTooltip,
   ZoomControl,
+  useMap,
   useMapEvent,
 } from 'react-leaflet';
 import { MapLegend } from './MapLegend';
 import { QuickDetailsPanel } from './QuickDetailsPanel';
-import { UpdatesBottomSheet } from './UpdatesBottomSheet';
 import { VehicleMarker } from './VehicleMarker';
 import { RouteLayer } from './RouteLayer';
 import { MapControls } from './MapControls';
 import { VehicleTooltip } from './VehicleTooltip';
 import { WasteContainerMarker } from './WasteContainerMarker';
-import { HEBRON_CENTER, LANDFILL_NAME, LANDFILL_POSITION, MAP_MAX_BOUNDS } from './mapGeo';
-import { useSmartRoutingPlan } from '../hooks/useSmartRoutingPlan';
+import { HeatmapLayer } from './HeatmapLayer';
+import { RoadHazardMarker } from './RoadHazardMarker';
+import { AddHazardForm } from './AddHazardForm';
+import { LANDFILL_NAME, LANDFILL_POSITION, MAP_DEFAULT_VIEW_CENTER, MAP_MAX_BOUNDS } from './mapGeo';
+import type { SmartRoutingPlanState } from '../hooks/useSmartRoutingPlan';
+import type { RoadHazardsState } from '../hooks/useRoadHazards';
 import { routeColor } from '../lib/routeColors';
 import { depotIcon, landfillIcon } from '../lib/mapIcons';
+import { haversineKm } from '../lib/smartRouting';
+import { PLAN_MODIFICATIONS_TODAY } from '../lib/wasteFleetData';
+import type { LatLng } from '../lib/wasteRoutingTypes';
+
+// Containers are snapped to the nearest road (see useSmartRoutingPlan), but
+// the resolved route polyline can still pick a slightly different point on
+// that same road segment. Snap the truck's displayed position to the nearest
+// vertex of its resolved, road-following route instead, so it always renders
+// on the line rather than floating just off it.
+function nearestPointOnPath(point: LatLng, path: LatLng[]): LatLng {
+  if (path.length === 0) return point;
+  let best = path[0];
+  let bestDistanceKm = haversineKm(point, path[0]);
+  for (let i = 1; i < path.length; i++) {
+    const distanceKm = haversineKm(point, path[i]);
+    if (distanceKm < bestDistanceKm) {
+      bestDistanceKm = distanceKm;
+      best = path[i];
+    }
+  }
+  return best;
+}
 
 export interface Vehicle {
   id: string;
@@ -40,19 +66,63 @@ export interface Route {
   color?: string;
 }
 
-function MapClickHandler({ onMapClick }: { onMapClick: () => void }) {
-  useMapEvent('click', onMapClick);
+function MapClickHandler({ onMapClick }: { onMapClick: (latlng: LeafletLatLng) => void }) {
+  useMapEvent('click', (e) => onMapClick(e.latlng));
   return null;
 }
 
-export function MapView() {
+// Zooming out is only unsafe past the point where the max-bounds box becomes
+// smaller than the on-screen map, since Leaflet would then have to fill the
+// rest of the viewport with whatever lies just outside the box (the Green
+// Line into Israel, in this app's case) - not before. So instead of a fixed
+// minZoom that blocks zooming out altogether, compute the tightest zoom that
+// still fits the whole box in the current container and allow anything down
+// to that, recomputing whenever the map container is resized.
+function BoundsMinZoom({ bounds }: { bounds: LatLngBoundsExpression }) {
+  const map = useMap();
+
+  useEffect(() => {
+    const applyMinZoom = () => {
+      const fitZoom = map.getBoundsZoom(bounds, false);
+      map.setMinZoom(fitZoom);
+      if (map.getZoom() < fitZoom) {
+        map.setZoom(fitZoom);
+      }
+    };
+
+    applyMinZoom();
+    map.on('resize', applyMinZoom);
+    window.addEventListener('resize', applyMinZoom);
+    return () => {
+      map.off('resize', applyMinZoom);
+      window.removeEventListener('resize', applyMinZoom);
+    };
+  }, [map, bounds]);
+
+  return null;
+}
+
+interface MapViewProps {
+  smartRouting: SmartRoutingPlanState;
+  roadHazards: RoadHazardsState;
+  isUpdatesOpen: boolean;
+  onOpenUpdates: () => void;
+}
+
+export function MapView({ smartRouting, roadHazards, isUpdatesOpen, onOpenUpdates }: MapViewProps) {
   // State management for map interactions
   const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
   const [showVehicles, setShowVehicles] = useState(true);
   const [showRoutes, setShowRoutes] = useState(true);
   const [showContainers, setShowContainers] = useState(true);
-  const [isUpdatesOpen, setIsUpdatesOpen] = useState(false);
+  const [showHeatmap, setShowHeatmap] = useState(false);
+  // null = show every truck's route; otherwise restrict to just these truck ids.
+  const [visibleRouteTruckIds, setVisibleRouteTruckIds] = useState<Set<string> | null>(null);
+  const [isAddHazardMode, setIsAddHazardMode] = useState(false);
+  const [pendingHazardPosition, setPendingHazardPosition] = useState<LatLng | null>(null);
+
+  const { hazards, addHazard, toggleHazardActive, removeHazard } = roadHazards;
 
   const {
     trucks,
@@ -63,7 +133,7 @@ export function MapView() {
     isResolvingRoads,
     isRegenerating,
     regenerate,
-  } = useSmartRoutingPlan();
+  } = smartRouting;
 
   // Depot locations actually used by the current fleet, for the small warehouse markers.
   const depots = useMemo(() => {
@@ -82,6 +152,7 @@ export function MapView() {
       trucks.map((truck) => {
         const routeIndex = plan.routes.findIndex((r) => r.truck.id === truck.id);
         const assignedRoute = routeIndex === -1 ? undefined : plan.routes[routeIndex];
+        const routePath = assignedRoute ? roadGeometry[truck.id] : undefined;
         return {
           id: truck.id,
           driver: truck.driver,
@@ -91,11 +162,16 @@ export function MapView() {
             : truck.status === 'maintenance'
               ? 'صيانة'
               : 'لا يوجد مسار اليوم',
-          position: assignedRoute ? assignedRoute.stops[0].container.position : truck.depot,
+          position:
+            assignedRoute && routePath
+              ? nearestPointOnPath(assignedRoute.stops[0].container.position, routePath)
+              : assignedRoute
+                ? assignedRoute.stops[0].container.position
+                : truck.depot,
           color: assignedRoute ? routeColor(routeIndex, plan.routes.length) : undefined,
         };
       }),
-    [trucks, plan.routes]
+    [trucks, plan.routes, roadGeometry]
   );
 
   // Smart-routing output -> road-following (or fallback) polylines, one distinct color per truck.
@@ -114,13 +190,20 @@ export function MapView() {
     [plan.routes, roadGeometry]
   );
 
+  // Which routes are actually drawn - all of them by default, or only the
+  // ones picked in the route filter dropdown (see RouteVehicleFilter).
+  const visibleRoutes = useMemo(
+    () => (visibleRouteTruckIds === null ? routes : routes.filter((r) => visibleRouteTruckIds.has(r.id))),
+    [routes, visibleRouteTruckIds]
+  );
+
   const handleVehicleClick = (vehicle: Vehicle, event: LeafletMouseEvent) => {
     setTooltipPosition({ x: event.originalEvent.clientX, y: event.originalEvent.clientY });
     setSelectedVehicle(vehicle);
   };
 
   const activeVehiclesCount = vehicles.filter(v => v.status === 'active').length;
-  const modificationsToday = 2;
+  const modificationsToday = PLAN_MODIFICATIONS_TODAY;
 
   return (
     <div className="h-full flex flex-col bg-background" dir="rtl">
@@ -129,12 +212,22 @@ export function MapView() {
         showVehicles={showVehicles}
         showRoutes={showRoutes}
         showContainers={showContainers}
+        showHeatmap={showHeatmap}
         onToggleVehicles={() => setShowVehicles(!showVehicles)}
         onToggleRoutes={() => setShowRoutes(!showRoutes)}
         onToggleContainers={() => setShowContainers(!showContainers)}
-        onOpenUpdates={() => setIsUpdatesOpen(true)}
+        onToggleHeatmap={() => setShowHeatmap(!showHeatmap)}
+        onOpenUpdates={onOpenUpdates}
         onRegenerateRoutes={regenerate}
         isRegeneratingRoutes={isRegenerating}
+        isAddHazardMode={isAddHazardMode}
+        onToggleAddHazardMode={() => {
+          setIsAddHazardMode((v) => !v);
+          setPendingHazardPosition(null);
+        }}
+        routes={routes}
+        visibleRouteTruckIds={visibleRouteTruckIds}
+        onVisibleRouteTruckIdsChange={setVisibleRouteTruckIds}
       />
 
       {/* Main Map Area */}
@@ -148,13 +241,13 @@ export function MapView() {
           style={{ zIndex: 0 }}
         >
           <MapContainer
-            center={HEBRON_CENTER}
-            zoom={13}
-            minZoom={13}
+            center={MAP_DEFAULT_VIEW_CENTER}
+            zoom={16}
             maxZoom={18}
             maxBounds={MAP_MAX_BOUNDS}
             maxBoundsViscosity={1.0}
             zoomControl={false}
+            markerZoomAnimation={false}
             className="absolute inset-0"
             style={{ direction: 'ltr' }}
           >
@@ -163,8 +256,13 @@ export function MapView() {
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
             <ZoomControl position="bottomright" />
+            <BoundsMinZoom bounds={MAP_MAX_BOUNDS} />
             <MapClickHandler
-              onMapClick={() => {
+              onMapClick={(latlng) => {
+                if (isAddHazardMode) {
+                  setPendingHazardPosition([latlng.lat, latlng.lng]);
+                  return;
+                }
                 if (!isUpdatesOpen) {
                   setSelectedVehicle(null);
                 }
@@ -191,7 +289,10 @@ export function MapView() {
             </Marker>
 
             {/* Smart-routing road routes, one color per truck */}
-            {showRoutes && <RouteLayer routes={routes} />}
+            {showRoutes && <RouteLayer routes={visibleRoutes} />}
+
+            {/* Waste production density, weighted by each container's estimated current volume */}
+            {showHeatmap && <HeatmapLayer containers={containers} />}
 
             {/* Waste containers, colored by fill level */}
             {showContainers &&
@@ -221,8 +322,33 @@ export function MapView() {
                   zIndexOffset={isUpdatesOpen ? -100 : 0}
                 />
               ))}
+
+            {/* Dispatcher-marked road closures / traffic jams - the optimizer
+                steers assignments away from active ones (see roadHazards.ts). */}
+            {hazards.map((hazard) => (
+              <RoadHazardMarker
+                key={hazard.id}
+                hazard={hazard}
+                onToggleActive={toggleHazardActive}
+                onRemove={removeHazard}
+              />
+            ))}
           </MapContainer>
         </motion.div>
+
+        {/* Add-hazard form, shown after clicking the map in add-hazard mode */}
+        <AnimatePresence>
+          {pendingHazardPosition && (
+            <AddHazardForm
+              position={pendingHazardPosition}
+              onSubmit={(input) => {
+                addHazard(input);
+                setPendingHazardPosition(null);
+              }}
+              onCancel={() => setPendingHazardPosition(null)}
+            />
+          )}
+        </AnimatePresence>
 
         {/* Road-routing progress indicator */}
         <AnimatePresence>
@@ -237,20 +363,6 @@ export function MapView() {
               <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
               جارٍ حساب المسارات على شبكة الطرق الفعلية...
             </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Dim Overlay when bottom sheet is open - Layer 1300 */}
-        <AnimatePresence>
-          {isUpdatesOpen && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="absolute inset-0 bg-black/30"
-              style={{ zIndex: 1300 }}
-              onClick={() => setIsUpdatesOpen(false)}
-            />
           )}
         </AnimatePresence>
 
@@ -269,14 +381,20 @@ export function MapView() {
             vehicle={selectedVehicle}
             position={tooltipPosition}
             onClose={() => setSelectedVehicle(null)}
+            isIsolated={
+              visibleRouteTruckIds !== null &&
+              visibleRouteTruckIds.size === 1 &&
+              visibleRouteTruckIds.has(selectedVehicle.id)
+            }
+            onToggleIsolate={() => {
+              setVisibleRouteTruckIds((current) =>
+                current !== null && current.size === 1 && current.has(selectedVehicle.id)
+                  ? null
+                  : new Set([selectedVehicle.id])
+              );
+            }}
           />
         )}
-
-        {/* Updates Bottom Sheet - Layer 1400 */}
-        <UpdatesBottomSheet
-          isOpen={isUpdatesOpen}
-          onClose={() => setIsUpdatesOpen(false)}
-        />
       </div>
     </div>
   );

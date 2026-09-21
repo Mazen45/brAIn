@@ -1,12 +1,24 @@
 import { AlertCircle, Clock, Truck, AlertTriangle } from 'lucide-react';
 import { motion } from 'motion/react';
 
-export function AnalysisSummaryCards() {
+interface AnalysisSummaryCardsProps {
+  criticalZonesCount: number;
+  delayedZonesCount: number;
+  hasResourceShortage: boolean;
+  availableVehicles: number;
+}
+
+export function AnalysisSummaryCards({
+  criticalZonesCount,
+  delayedZonesCount,
+  hasResourceShortage,
+  availableVehicles,
+}: AnalysisSummaryCardsProps) {
   const cards = [
     {
       id: 1,
       title: 'المناطق الحرجة',
-      value: 3,
+      value: criticalZonesCount,
       icon: AlertCircle,
       variant: 'critical' as const,
       delay: 0,
@@ -14,7 +26,7 @@ export function AnalysisSummaryCards() {
     {
       id: 2,
       title: 'مناطق قد تتأخر',
-      value: 5,
+      value: delayedZonesCount,
       icon: Clock,
       variant: 'warning' as const,
       delay: 0.1,
@@ -22,7 +34,7 @@ export function AnalysisSummaryCards() {
     {
       id: 3,
       title: 'المركبات المتاحة',
-      value: 11,
+      value: availableVehicles,
       icon: Truck,
       variant: 'success' as const,
       delay: 0.2,
@@ -30,7 +42,7 @@ export function AnalysisSummaryCards() {
     {
       id: 4,
       title: 'نقص في الموارد',
-      value: 'نعم',
+      value: hasResourceShortage ? 'نعم' : 'لا',
       icon: AlertTriangle,
       variant: 'warning' as const,
       delay: 0.3,

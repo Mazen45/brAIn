@@ -1,7 +1,12 @@
 import { AlertCircle } from 'lucide-react';
 import { motion } from 'motion/react';
+import type { RoutingMetrics } from '../lib/wasteRoutingTypes';
 
-export function StatusAlerts() {
+interface StatusAlertsProps {
+  metrics: RoutingMetrics;
+}
+
+export function StatusAlerts({ metrics }: StatusAlertsProps) {
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
@@ -15,8 +20,8 @@ export function StatusAlerts() {
         </div>
         <div className="flex-1">
           <p className="text-foreground font-medium">
-            تم تسجيل <span className="font-bold text-warning">2 سائقين</span> غير متاحين اليوم و{' '}
-            <span className="font-bold text-warning">1 مركبة</span> خارج الخدمة
+            تم تسجيل <span className="font-bold text-warning">{metrics.driversUnavailable} سائقين</span> غير متاحين اليوم و{' '}
+            <span className="font-bold text-warning">{metrics.vehiclesOutOfService} مركبات</span> خارج الخدمة
           </p>
         </div>
       </div>

@@ -1,12 +1,18 @@
 import { Truck, TruckIcon, MapPin, RefreshCw } from 'lucide-react';
 import { motion } from 'motion/react';
+import { PLAN_MODIFICATIONS_TODAY } from '../lib/wasteFleetData';
+import type { RoutingMetrics } from '../lib/wasteRoutingTypes';
 
-export function RouteSummaryCards() {
+interface RouteSummaryCardsProps {
+  metrics: RoutingMetrics;
+}
+
+export function RouteSummaryCards({ metrics }: RouteSummaryCardsProps) {
   const cards = [
     {
       id: 1,
       title: 'عدد المركبات المتاحة',
-      value: 15,
+      value: metrics.availableTrucks,
       icon: Truck,
       color: 'primary' as const,
       delay: 0,
@@ -14,7 +20,7 @@ export function RouteSummaryCards() {
     {
       id: 2,
       title: 'عدد المركبات العاملة حالياً',
-      value: 11,
+      value: metrics.trucksUsed,
       icon: TruckIcon,
       color: 'success' as const,
       delay: 0.1,
@@ -30,7 +36,7 @@ export function RouteSummaryCards() {
     {
       id: 4,
       title: 'عدد التعديلات اليوم',
-      value: 3,
+      value: PLAN_MODIFICATIONS_TODAY,
       icon: RefreshCw,
       color: 'warning' as const,
       delay: 0.3,

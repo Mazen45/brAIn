@@ -13,3 +13,10 @@ export const landfillIcon = L.divIcon({
   iconSize: [30, 30],
   iconAnchor: [15, 15],
 });
+
+export const closureIcon = L.divIcon({
+  className: 'hazard-div-icon',
+  html: '<div class="hazard-pin hazard-pin--closure">🚧</div>',
+  iconSize: [28, 28],
+  iconAnchor: [14, 14],
+});

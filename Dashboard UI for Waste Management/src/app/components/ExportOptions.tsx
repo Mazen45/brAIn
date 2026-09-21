@@ -1,23 +1,49 @@
-import { Download, FileText, FileSpreadsheet } from 'lucide-react';
+import { Download, FileText, FileSpreadsheet, Loader2 } from 'lucide-react';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import { useToast } from '../hooks/useToast';
+import { Toast } from './Toast';
+import { downloadReportCsv, downloadReportPdf, REPORT_CONTENT_ELEMENT_ID } from '../lib/reportExport';
 
-export function ExportOptions() {
+interface ExportOptionsProps {
+  selectedPeriod: string;
+  selectedType: string;
+}
+
+export function ExportOptions({ selectedPeriod, selectedType }: ExportOptionsProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [isExportingPdf, setIsExportingPdf] = useState(false);
+  const { message, showToast } = useToast();
 
-  const handleExport = (format: string) => {
-    alert(`جاري تحميل التقرير بصيغة ${format}...`);
+  const handleExportCsv = () => {
+    downloadReportCsv(selectedPeriod, selectedType);
+    showToast('تم تحميل التقرير بصيغة Excel');
     setIsOpen(false);
+  };
+
+  const handleExportPdf = async () => {
+    setIsOpen(false);
+    setIsExportingPdf(true);
+    try {
+      await downloadReportPdf(REPORT_CONTENT_ELEMENT_ID, `تقرير-النظام-${selectedPeriod}.pdf`);
+      showToast('تم تحميل التقرير بصيغة PDF');
+    } catch {
+      showToast('تعذّر إنشاء ملف PDF، يرجى المحاولة مرة أخرى');
+    } finally {
+      setIsExportingPdf(false);
+    }
   };
 
   return (
     <div className="relative">
+      <Toast message={message} />
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-all duration-200 shadow-md hover:shadow-lg"
+        disabled={isExportingPdf}
+        className="flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-all duration-200 shadow-md hover:shadow-lg disabled:opacity-60 disabled:cursor-not-allowed"
       >
-        <Download className="w-4 h-4" />
-        <span className="font-medium">تحميل التقرير</span>
+        {isExportingPdf ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+        <span className="font-medium">{isExportingPdf ? 'جارٍ إنشاء الملف...' : 'تحميل التقرير'}</span>
       </button>
 
       <AnimatePresence>
@@ -39,26 +65,26 @@ export function ExportOptions() {
               dir="rtl"
             >
               <button
-                onClick={() => handleExport('PDF')}
+                onClick={handleExportPdf}
                 className="w-full flex items-center gap-3 px-4 py-3 hover:bg-muted transition-colors text-right"
               >
                 <FileText className="w-5 h-5 text-destructive" />
                 <div>
                   <p className="font-semibold text-foreground">تحميل PDF</p>
-                  <p className="text-xs text-muted-foreground">ملف قابل للطباعة</p>
+                  <p className="text-xs text-muted-foreground">لقطة من صفحة التقارير الحالية</p>
                 </div>
               </button>
 
               <div className="border-t border-border" />
 
               <button
-                onClick={() => handleExport('Excel')}
+                onClick={handleExportCsv}
                 className="w-full flex items-center gap-3 px-4 py-3 hover:bg-muted transition-colors text-right"
               >
                 <FileSpreadsheet className="w-5 h-5 text-success" />
                 <div>
                   <p className="font-semibold text-foreground">تحميل Excel</p>
-                  <p className="text-xs text-muted-foreground">ملف قابل للتحليل</p>
+                  <p className="text-xs text-muted-foreground">ملف CSV يفتح مباشرة في Excel</p>
                 </div>
               </button>
             </motion.div>

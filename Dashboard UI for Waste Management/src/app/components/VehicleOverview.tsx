@@ -1,45 +1,23 @@
-import { Truck, CheckCircle, WrenchIcon, AlertTriangle } from 'lucide-react';
+import { Truck, CheckCircle, WrenchIcon } from 'lucide-react';
 import { motion } from 'motion/react';
+import type { Truck as TruckData, TruckRoute } from '../lib/wasteRoutingTypes';
 
-export function VehicleOverview() {
-  const vehicles = [
-    {
-      id: 1,
-      number: 'مركبة 1',
-      driver: 'أحمد محمد',
-      status: 'operational' as const,
-    },
-    {
-      id: 2,
-      number: 'مركبة 2',
-      driver: 'سارة أحمد',
-      status: 'operational' as const,
-    },
-    {
-      id: 3,
-      number: 'مركبة 3',
-      driver: '-',
-      status: 'out-of-service' as const,
-    },
-    {
-      id: 4,
-      number: 'مركبة 4',
-      driver: 'فاطمة حسن',
-      status: 'operational' as const,
-    },
-    {
-      id: 5,
-      number: 'مركبة 5',
-      driver: 'خالد يوسف',
-      status: 'operational' as const,
-    },
-    {
-      id: 6,
-      number: 'مركبة 6',
-      driver: '-',
-      status: 'maintenance' as const,
-    },
-  ];
+interface VehicleOverviewProps {
+  trucks: TruckData[];
+  routes: TruckRoute[];
+}
+
+export function VehicleOverview({ trucks, routes }: VehicleOverviewProps) {
+  const vehicles = trucks.map((truck) => {
+    const route = routes.find((r) => r.truck.id === truck.id);
+    return {
+      id: truck.id,
+      number: truck.id,
+      driver: truck.driver,
+      status: truck.status === 'maintenance' ? ('maintenance' as const) : ('operational' as const),
+      onRouteToday: Boolean(route),
+    };
+  });
 
   const statusConfig = {
     operational: {
@@ -49,14 +27,6 @@ export function VehicleOverview() {
       border: 'border-success/30',
       text: 'text-success',
       iconBg: 'bg-success/20',
-    },
-    'out-of-service': {
-      label: 'خارج الخدمة',
-      icon: AlertTriangle,
-      bg: 'bg-destructive/10',
-      border: 'border-destructive/30',
-      text: 'text-destructive',
-      iconBg: 'bg-destructive/20',
     },
     maintenance: {
       label: 'قيد الصيانة',
@@ -76,7 +46,7 @@ export function VehicleOverview() {
       className="bg-card rounded-xl border-2 border-border p-6 shadow-lg"
     >
       <h3 className="text-lg font-semibold mb-4">حالة المركبات</h3>
-      <p className="text-sm text-muted-foreground mb-6">نظرة شاملة على جميع المركبات وحالتها الحالية</p>
+      <p className="text-sm text-muted-foreground mb-6">حالة جميع مركبات الأسطول وسائقيها المرتبطين</p>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {vehicles.map((vehicle, index) => {
@@ -117,6 +87,14 @@ export function VehicleOverview() {
                   <span className="text-xs text-muted-foreground">السائق المرتبط:</span>
                   <span className="text-sm font-medium text-foreground">{vehicle.driver}</span>
                 </div>
+                {vehicle.status === 'operational' && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-muted-foreground">مسار اليوم:</span>
+                    <span className="text-sm font-medium text-foreground">
+                      {vehicle.onRouteToday ? 'قيد التنفيذ' : 'لا يوجد'}
+                    </span>
+                  </div>
+                )}
               </div>
             </motion.div>
           );
@@ -134,12 +112,6 @@ export function VehicleOverview() {
             <span className="text-sm text-muted-foreground">العاملة: </span>
             <span className="font-bold text-success">
               {vehicles.filter((v) => v.status === 'operational').length}
-            </span>
-          </div>
-          <div>
-            <span className="text-sm text-muted-foreground">خارج الخدمة: </span>
-            <span className="font-bold text-destructive">
-              {vehicles.filter((v) => v.status === 'out-of-service').length}
             </span>
           </div>
           <div>

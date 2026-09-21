@@ -4,8 +4,17 @@ import { DriversTable } from './DriversTable';
 import { VehicleOverview } from './VehicleOverview';
 import { QuickStatusUpdate } from './QuickStatusUpdate';
 import { StatusAlerts } from './StatusAlerts';
+import type { SmartRoutingPlanState } from '../hooks/useSmartRoutingPlan';
+import type { FleetDataSource } from '../hooks/useFleetDataSource';
 
-export function DriversVehicles() {
+interface DriversVehiclesProps {
+  smartRouting: SmartRoutingPlanState;
+  fleetDataSource: FleetDataSource;
+}
+
+export function DriversVehicles({ smartRouting, fleetDataSource }: DriversVehiclesProps) {
+  const { trucks, plan } = smartRouting;
+
   return (
     <div className="flex-1 overflow-auto" dir="rtl">
       <div className="max-w-7xl mx-auto p-6 space-y-6">
@@ -22,19 +31,23 @@ export function DriversVehicles() {
         </motion.div>
 
         {/* Summary Cards */}
-        <DriversVehiclesSummary />
+        <DriversVehiclesSummary metrics={plan.metrics} />
 
         {/* Status Alerts */}
-        <StatusAlerts />
+        <StatusAlerts metrics={plan.metrics} />
 
         {/* Quick Status Update */}
-        <QuickStatusUpdate />
+        <QuickStatusUpdate
+          trucks={trucks}
+          onUpdateDriverAvailability={fleetDataSource.setDriverAvailability}
+          onUpdateVehicleStatus={fleetDataSource.setTruckStatus}
+        />
 
         {/* Drivers Table */}
-        <DriversTable />
+        <DriversTable trucks={trucks} routes={plan.routes} />
 
         {/* Vehicle Overview */}
-        <VehicleOverview />
+        <VehicleOverview trucks={trucks} routes={plan.routes} />
       </div>
     </div>
   );

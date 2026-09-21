@@ -1,50 +1,61 @@
 import { X, Clock } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
+export interface SystemUpdate {
+  id: number;
+  text: string;
+  time: string;
+  type: 'info' | 'warning' | 'success' | 'alert';
+}
+
+// Shared with the Alerts page, so both surfaces show the same events instead
+// of maintaining two separate lists that can drift apart.
+export const SYSTEM_UPDATES: SystemUpdate[] = [
+  {
+    id: 1,
+    text: 'تم إعادة توزيع حاويات مركبة 3 إلى مركبة 1',
+    time: 'منذ 5 دقائق',
+    type: 'info',
+  },
+  {
+    id: 2,
+    text: 'السائق محمد علي غير متاح - تم تحديث المسار',
+    time: 'منذ 12 دقيقة',
+    type: 'warning',
+  },
+  {
+    id: 3,
+    text: 'تم تحديث المسار 2 بنجاح',
+    time: 'منذ 20 دقيقة',
+    type: 'success',
+  },
+  {
+    id: 4,
+    text: 'تنبيه: تراكم عالي في عدة حاويات',
+    time: 'منذ 25 دقيقة',
+    type: 'alert',
+  },
+  {
+    id: 5,
+    text: 'تم إضافة مسار جديد لمركبة 4',
+    time: 'منذ 35 دقيقة',
+    type: 'info',
+  },
+  {
+    id: 6,
+    text: 'اكتمال جمع النفايات لمسار مركبة 2',
+    time: 'منذ ساعة',
+    type: 'success',
+  },
+];
+
 interface UpdatesBottomSheetProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
 export function UpdatesBottomSheet({ isOpen, onClose }: UpdatesBottomSheetProps) {
-  const updates = [
-    {
-      id: 1,
-      text: 'تم إعادة توزيع حاويات مركبة 3 إلى مركبة 1',
-      time: 'منذ 5 دقائق',
-      type: 'info'
-    },
-    {
-      id: 2,
-      text: 'السائق محمد علي غير متاح - تم تحديث المسار',
-      time: 'منذ 12 دقيقة',
-      type: 'warning'
-    },
-    {
-      id: 3,
-      text: 'تم تحديث المسار 2 بنجاح',
-      time: 'منذ 20 دقيقة',
-      type: 'success'
-    },
-    {
-      id: 4,
-      text: 'تنبيه: تراكم عالي في عدة حاويات',
-      time: 'منذ 25 دقيقة',
-      type: 'alert'
-    },
-    {
-      id: 5,
-      text: 'تم إضافة مسار جديد لمركبة 4',
-      time: 'منذ 35 دقيقة',
-      type: 'info'
-    },
-    {
-      id: 6,
-      text: 'اكتمال جمع النفايات لمسار مركبة 2',
-      time: 'منذ ساعة',
-      type: 'success'
-    },
-  ];
+  const updates = SYSTEM_UPDATES;
 
   return (
     <AnimatePresence>
